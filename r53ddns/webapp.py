@@ -91,3 +91,7 @@ def status(hostname):
 def check():
     return bottle.request.remote_addr
 
+@app.route('/')
+def index():
+    return 'Nothing to see here.'
+
