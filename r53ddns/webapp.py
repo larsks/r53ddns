@@ -53,7 +53,7 @@ def find_recordset(host):
     return rs
 
 
-@app.route('/update/:hostname', method='post')
+@app.route('/update/:hostname')
 def update(hostname):
     try:
         host = find_registration(hostname)
@@ -93,5 +93,8 @@ def check():
 
 @app.route('/')
 def index():
-    return 'Nothing to see here.'
+    return 'See <a href="%s">%s</a> for more information.' % (
+        'http://github.com/larsks/r53ddns',
+        'http://github.com/larsks/r53ddns',
+    )
 
