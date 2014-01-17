@@ -1,3 +1,5 @@
 route53
 bottle
 gevent
+PyYAML
+
