@@ -8,13 +8,15 @@
 #
 import imp
 import os
+from r53ddns.webapp import app
 
-try:
-   zvirtenv = os.path.join(os.environ['OPENSHIFT_PYTHON_DIR'],
-                           'virtenv', 'bin', 'activate_this.py')
-   execfile(zvirtenv, dict(__file__ = zvirtenv) )
-except IOError:
-   pass
+if 'OPENSHIFT_PYTHON_DIR' in os.environ:
+    try:
+       zvirtenv = os.path.join(os.environ['OPENSHIFT_PYTHON_DIR'],
+                               'virtenv', 'bin', 'activate_this.py')
+       execfile(zvirtenv, dict(__file__ = zvirtenv) )
+    except IOError:
+       pass
 
 #
 # IMPORTANT: Put any additional includes below this line.  If placed above this
@@ -28,7 +30,6 @@ except IOError:
 if __name__ == '__main__':
    ip   = os.environ['OPENSHIFT_PYTHON_IP']
    port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
-   app = imp.load_source('application', 'wsgi/application')
 
    fwtype="wsgiref"
    for fw in ("gevent", "cherrypy", "flask"):
@@ -41,20 +42,21 @@ if __name__ == '__main__':
    print('Starting WSGIServer type %s on %s:%d ... ' % (fwtype, ip, port))
    if fwtype == "gevent":
       from gevent.pywsgi import WSGIServer
-      WSGIServer((ip, port), app.application).serve_forever()
+      WSGIServer((ip, port), app).serve_forever()
 
    elif fwtype == "cherrypy":
       from cherrypy import wsgiserver
       server = wsgiserver.CherryPyWSGIServer(
-         (ip, port), app.application, server_name=os.environ['OPENSHIFT_APP_DNS'])
+         (ip, port), app, server_name=os.environ['OPENSHIFT_APP_DNS'])
       server.start()
 
    elif fwtype == "flask":
       from flask import Flask
       server = Flask(__name__)
-      server.wsgi_app = app.application
+      server.wsgi_app = app
       server.run(host=ip, port=port)
 
    else:
       from wsgiref.simple_server import make_server
-      make_server(ip, port, app.application).serve_forever()
+      make_server(ip, port, app).serve_forever()
+
