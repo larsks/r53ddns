@@ -28,8 +28,8 @@ if 'OPENSHIFT_PYTHON_DIR' in os.environ:
 #  main():
 #
 if __name__ == '__main__':
-   ip   = os.environ['OPENSHIFT_PYTHON_IP']
-   port = int(os.environ['OPENSHIFT_PYTHON_PORT'])
+   ip   = os.environ.get('OPENSHIFT_PYTHON_IP', '127.0.0.1')
+   port = int(os.environ.get('OPENSHIFT_PYTHON_PORT', '8080'))
 
    fwtype="wsgiref"
    for fw in ("gevent", "cherrypy", "flask"):
