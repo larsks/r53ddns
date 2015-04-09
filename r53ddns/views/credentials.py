@@ -2,7 +2,7 @@ from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco import context
 from fresco.exceptions import *
 
-from ..utils import json_response, require_admin
+from ..utils import *
 from ..model import *
 
 
@@ -19,6 +19,7 @@ class CredentialManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def list_credentials(self, username):
         account = lookup_user(username)
         if not account:
@@ -30,6 +31,7 @@ class CredentialManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def create_credentials(self, username, accesskey, secretkey, credname=None):
         account = lookup_user(username)
         if not account:
@@ -47,14 +49,15 @@ class CredentialManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def get_credentials(self, username, id):
         account = lookup_user(username)
         if not account:
             raise NotFound()
 
         cred = get(c for c in Credentials
-                if c.owner.id == account.id and 
-                c.id == id)
+                   if c.owner.id == account.id and
+                   c.id == id)
         if not cred:
             raise NotFound()
 
@@ -62,14 +65,15 @@ class CredentialManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def delete_credentials(self, username, id):
         account = lookup_user(username)
         if not account:
             raise NotFound()
 
         cred = get(c for c in Credentials
-                if c.owner.id == account.id and 
-                c.id == id)
+                   if c.owner.id == account.id and
+                   c.id == id)
         if not cred:
             raise NotFound()
 

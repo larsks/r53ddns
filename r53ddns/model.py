@@ -1,6 +1,13 @@
 from datetime import datetime
 from pony.orm import *
 
+__all__ = [
+    'db', 'Account', 'Credentials',
+    'Host', 'lookup_user', 
+    'setup_database', 'db_session',
+    'get', 'select'
+]
+
 db = Database()
 
 
@@ -10,6 +17,7 @@ class Account(db.Entity):
                        default=datetime.now)
     name = Required(str, unique=True)
     password = Required(str)
+    is_admin = Required(bool, default=False)
     credentials = Set("Credentials")
 
 

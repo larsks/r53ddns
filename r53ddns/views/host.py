@@ -5,7 +5,7 @@ from fresco.exceptions import *
 
 import route53
 
-from ..utils import json_response, require_admin
+from ..utils import *
 from ..model import *
 
 class HostManager (object):
@@ -22,7 +22,9 @@ class HostManager (object):
 
     @json_response
     @db_session
+    @is_authenticated
     def list_hosts(self, username):
+        admin_or_self(username)
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -33,6 +35,7 @@ class HostManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def get_host(self, username, hostname):
         account = lookup_user(username)
         if not account:
@@ -46,6 +49,7 @@ class HostManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def update_host(self, username, hostname, address=None):
         if address is None:
             address = context.request.environ['REMOTE_ADDR']
@@ -84,6 +88,7 @@ class HostManager (object):
 
     @json_response
     @db_session
+    @is_admin_or_self
     def create_host(self, username, hostname, credentials, zone=None):
         account = lookup_user(username)
         if not account:
