@@ -1,3 +1,4 @@
+import os
 from fresco import FrescoApp
 import base64
 import logging
@@ -14,7 +15,9 @@ config = {
 
 app = FrescoApp()
 app.options.update(config)
-app.options.update_from_file('settings.py')
+app.options.update_from_file(os.path.join(
+    os.environ.get('OPENSHIFT_DATA_DIR', '.'),
+    'settings.py'))
 
 setup_database(app.options.DATABASE)
 
