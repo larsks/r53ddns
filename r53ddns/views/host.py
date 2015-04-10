@@ -2,6 +2,7 @@ from fresco import Route, GET, POST, PUT, DELETE, Response
 from fresco import PostArg, GetArg
 from fresco import context
 from fresco.exceptions import *
+import datetime
 
 import route53
 
@@ -70,11 +71,12 @@ class HostManager (object):
                     if z.name == host.zone + '.').next()
             rs = (r for r in zone.record_sets
                   if r.name == host.name + '.').next()
-        except StopIteration:
+        except (StopIteration, TypeError):
             raise NotFound()
 
         rs.records = [address]
         rs.save()
+        host.last_update = datetime.datetime.utcnow()
 
         return {
             'status': 'updated',

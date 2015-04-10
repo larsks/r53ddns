@@ -16,7 +16,7 @@ db = Database()
 class Account(db.Entity):
     id = PrimaryKey(int, auto=True)
     created = Required(datetime,
-                       default=datetime.now)
+                       default=datetime.utcnow)
     name = Required(str, unique=True)
     password = Required(str)
     is_admin = Required(bool, default=False)
@@ -30,6 +30,8 @@ class Credentials(db.Entity):
     accesskey = Required(str)
     secretkey = Required(str)
     hosts = Set("Host")
+    created = Required(datetime,
+                           default=datetime.utcnow)
 
     composite_key(owner, accesskey, secretkey)
     composite_key(owner, name)
@@ -40,6 +42,10 @@ class Host(db.Entity):
     credentials = Required(Credentials)
     zone = Required(str)
     name = Required(str)
+    created = Required(datetime,
+                           default=datetime.utcnow)
+    last_update = Required(datetime,
+                           default=datetime.utcnow)
 
     composite_key(credentials, zone, name)
 
