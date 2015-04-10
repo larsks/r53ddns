@@ -82,14 +82,14 @@ class HostManager (object):
         if not host:
             raise NotFound()
 
-        self.update_route53(host)
+        self.update_route53(host, address)
 
         host.last_update = datetime.datetime.utcnow()
         host.last_address = address
 
         return host.to_dict()
 
-    def update_route53(self, host):
+    def update_route53(self, host, address):
         if context.app.options.get('NO_ROUTE53_UPDATE'):
             LOG.info('skipping route53 update for %s',
                      host.name)
