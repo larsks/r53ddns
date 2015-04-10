@@ -4,7 +4,7 @@ from fresco import Response, context
 import json
 import datetime
 
-from model import *
+from r53ddns.model import *
 
 __all__ = [
     'json_response',
@@ -14,9 +14,11 @@ __all__ = [
     'remote_addr',
 ]
 
+
 def json_dumps_helper(data):
     if isinstance(data, datetime.datetime):
         return str(data)
+
 
 @decorator
 def json_response(func, *args, **kwargs):

@@ -7,8 +7,8 @@ from fresco.exceptions import *
 
 import route53
 
-from ..utils import *
-from ..model import *
+from r53ddns.utils import *
+from r53ddns.model import *
 
 LOG = logging.getLogger(__name__)
 

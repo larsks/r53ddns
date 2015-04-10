@@ -4,8 +4,8 @@ import base64
 import logging
 from passlib.apps import custom_app_context as passlib
 
-import views
-from model import *
+import r53ddns.views as views
+from r53ddns.model import *
 
 LOG = logging.getLogger(__name__)
 
