@@ -67,9 +67,10 @@ class Host(db.Entity):
     zone = Required(str)
     name = Required(str)
     created = Required(datetime,
-                           default=datetime.utcnow)
+                       default=datetime.utcnow)
     last_update = Required(datetime,
                            default=datetime.utcnow)
+    last_address = Optional(str)
 
     composite_key(credentials, zone, name)
 

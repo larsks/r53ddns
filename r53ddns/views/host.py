@@ -18,7 +18,7 @@ import logging
 import datetime
 
 from fresco import Route, GET, POST, PUT, DELETE, Response
-from fresco import PostArg, GetArg
+from fresco import PostArg, GetArg, context
 from fresco.exceptions import *
 
 import route53
@@ -82,6 +82,21 @@ class HostManager (object):
         if not host:
             raise NotFound()
 
+        self.update_route53(host)
+
+        host.last_update = datetime.datetime.utcnow()
+        host.last_address = address
+
+        return host.to_dict()
+
+    def update_route53(self, host):
+        if context.app.options.get('NO_ROUTE53_UPDATE'):
+            LOG.info('skipping route53 update for %s',
+                     host.name)
+            return
+
+        LOG.info('updating route53 for %s', host.name)
+
         amz = route53.connect(
             aws_access_key_id=host.credentials.accesskey,
             aws_secret_access_key=host.credentials.secretkey)
@@ -96,13 +111,6 @@ class HostManager (object):
 
         rs.records = [address]
         rs.save()
-        host.last_update = datetime.datetime.utcnow()
-
-        return {
-            'status': 'updated',
-            'data': {
-                'address': address,
-            }}
 
     @json_response
     @db_session
@@ -124,6 +132,4 @@ class HostManager (object):
             zone=zone,
             name=hostname)
 
-        return {
-            'status': 'created',
-            'data': host.to_dict()}
+        return host.to_dict()

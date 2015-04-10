@@ -35,7 +35,8 @@ class RootManager(object):
     ]
 
     def index(self):
-        return Response('R53DDNS (http://github.com/larsks/r53ddns)\n')
+        return Response('R53DDNS (http://github.com/larsks/r53ddns)\n',
+                        content_type='text/plain')
 
     @json_response
     @db_session

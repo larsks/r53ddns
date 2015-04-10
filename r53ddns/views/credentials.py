@@ -62,8 +62,7 @@ class CredentialManager (object):
             secretkey=secretkey,
             name=label)
 
-        return {'status': 'created',
-                'data': cred.to_dict()}
+        return cred.to_dict()
 
     @json_response
     @db_session
@@ -94,7 +93,4 @@ class CredentialManager (object):
         save = cred.to_dict()
         cred.delete()
 
-        return {
-            'status': 'deleted',
-            'data': save,
-        }
+        return save
