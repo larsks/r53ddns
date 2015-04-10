@@ -13,5 +13,4 @@ except IOError:
 #
 
 import r53ddns.app
-application = r53ddns.app
-
+application = r53ddns.app.app
