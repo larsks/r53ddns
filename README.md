@@ -42,7 +42,7 @@ Required values:
 
 Option values:
 
-- `credname` -- a label that can be used to refer to these credentials
+- `label` -- a label that can be used to refer to these credentials
 
 ### POST /user/`<username>`/host/
 
@@ -89,3 +89,67 @@ Available configuration options:
 - `DATABASE` -- path to (SQLite) database file
 - `ADMIN_NAME` -- name of admin user
 - `ADMIN_PASSWORD` -- password of admin user
+
+## Example
+
+- Create a new user account.
+
+        $ curl http://r53ddns.example.com/user/ \
+          -d username=lars -d password=macaroni \
+          -u admin:secret
+        {
+          "status": "created", 
+          "data": {
+            "password": "macaroni", 
+            "is_admin": false, 
+            "id": 1, 
+            "name": "lars", 
+            "created": "2015-04-09 15:30:51.209231"
+          }
+        }
+
+- Add a set of AWS credentials:
+
+        $ curl http://r53ddns.example.com/user/lars/credentials/ \
+          -d accesskey=123456 \
+          -d secretkey=abcdef \
+          -d label=default \
+          -u lars:macaroni
+        {
+          "status": "created", 
+          "data": {
+            "owner": 1, 
+            "secretkey": "abcdef", 
+            "accesskey": "123456", 
+            "id": 1, 
+            "name": "default"
+          }
+        }
+
+- Add a host record:
+
+        $ curl http://r53ddns.example.com/user/lars/host/ \
+          -d hostname=r53-test.oddbit.com \
+          -d credentials=default \
+          -u lars:macaroni
+        {
+          "status": "created", 
+          "data": {
+            "credentials": 1, 
+            "id": 1, 
+            "zone": "oddbit.com", 
+            "name": "r53-test.oddbit.com"
+          }
+        }
+
+- Update the address in AWS Route53:
+
+        $ curl http://r53ddns.example.com/user/lars/host/r53-test.oddbit.com/update \
+          -u lars:macaroni
+        {
+          "status": "updated", 
+          "data": {
+            "address": "10.0.0.97"
+          }
+        }
+
