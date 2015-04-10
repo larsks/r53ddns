@@ -53,8 +53,7 @@ class HostManager (object):
         env = context.request.environ
 
         if address is None:
-            address = env.get('HTTP_X_FORWARDED_FOR',
-                              env['REMOTE_ADDR'])
+            address = remote_addr()
 
         account = lookup_user(username)
         if not account:

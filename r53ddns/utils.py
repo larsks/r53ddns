@@ -11,6 +11,7 @@ __all__ = [
     'is_admin',
     'is_authenticated',
     'is_admin_or_self',
+    'remote_addr',
 ]
 
 def json_dumps_helper(data):
@@ -75,3 +76,12 @@ def is_admin_or_self(func, *args, **kwargs):
         raise Forbidden()
 
     return func(*args, **kwargs)
+
+
+def remote_addr():
+    env = context.request.environ
+
+    address = env.get('HTTP_X_FORWARDED_FOR',
+                      env['REMOTE_ADDR'])
+
+    return address

@@ -9,6 +9,7 @@ class RootManager(object):
     __routes__ = [
         Route('/', GET, 'index'),
         Route('/debug', GET, 'debug'),
+        Route('/ip', GET, 'ip'),
     ]
 
     def index(self):
@@ -19,3 +20,6 @@ class RootManager(object):
     @is_admin
     def debug(self):
         return context.request.environ
+
+    def ip(self):
+        return Response(remote_addr() + '\n')
