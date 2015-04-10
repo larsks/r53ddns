@@ -1,9 +1,12 @@
 from datetime import datetime
 from pony.orm import *
 
+sql_debug(True)
+
 __all__ = [
     'db', 'Account', 'Credentials',
-    'Host', 'lookup_user', 
+    'Host', 'lookup_user',
+    'lookup_credentials_for',
     'setup_database', 'db_session',
     'get', 'select'
 ]
@@ -51,9 +54,18 @@ def lookup_user(name_or_id):
     if name_or_id.isdigit():
         return Account[int(name_or_id)]
     else:
-        return get(acc for acc in Account
-                      if acc.name == name_or_id)
+        return get(obj for obj in Account
+                   if obj.name == name_or_id)
 
+def lookup_credentials_for(account, name_or_id):
+    if name_or_id.isdigit():
+        return get(c for c in Credentials
+                   if c.owner.id == account.id and
+                   c.id == name_or_id)
+    else:
+        return get(c for c in Credentials
+                   if c.owner.id == account.id and
+                   c.name == name_or_id)
 
 if __name__ == '__main__':
     import sys

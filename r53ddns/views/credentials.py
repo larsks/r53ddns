@@ -12,9 +12,9 @@ class CredentialManager (object):
         Route('/', POST, 'create_credentials',
               accesskey=PostArg(),
               secretkey=PostArg(),
-              credname=PostArg()),
-        Route('/<id:int>', GET, 'get_credentials'),
-        Route('/<id:int>', DELETE, 'delete_credentials'),
+              label=PostArg()),
+        Route('/<id:str>', GET, 'get_credentials'),
+        Route('/<id:str>', DELETE, 'delete_credentials'),
     ]
 
     @json_response
@@ -32,7 +32,7 @@ class CredentialManager (object):
     @json_response
     @db_session
     @is_admin_or_self
-    def create_credentials(self, username, accesskey, secretkey, credname=None):
+    def create_credentials(self, username, accesskey, secretkey, label=None):
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -41,11 +41,10 @@ class CredentialManager (object):
             owner=account,
             accesskey=accesskey,
             secretkey=secretkey,
-            name=credname)
+            name=label)
 
         return {'status': 'created',
                 'data': cred.to_dict()}
-
 
     @json_response
     @db_session
@@ -55,9 +54,7 @@ class CredentialManager (object):
         if not account:
             raise NotFound()
 
-        cred = get(c for c in Credentials
-                   if c.owner.id == account.id and
-                   c.id == id)
+        cred = lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
@@ -71,9 +68,7 @@ class CredentialManager (object):
         if not account:
             raise NotFound()
 
-        cred = get(c for c in Credentials
-                   if c.owner.id == account.id and
-                   c.id == id)
+        cred = lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 

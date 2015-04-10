@@ -50,8 +50,6 @@ class HostManager (object):
     @db_session
     @is_admin_or_self
     def update_host(self, username, hostname, address=None):
-        env = context.request.environ
-
         if address is None:
             address = remote_addr()
 
@@ -95,9 +93,7 @@ class HostManager (object):
         if not account:
             raise NotFound()
 
-        cred = get(c for c in Credentials
-                   if c.owner.id == account.id and
-                   c.id == credentials)
+        cred = lookup_credentials_for(account, credentials)
         if not cred:
             raise NotFound()
 
