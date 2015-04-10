@@ -12,6 +12,8 @@ class UserManager (object):
         Route('/debug', GET, 'debug'),
         Route('/<username:str>', GET, 'get_user'),
         Route('/<username:str>', DELETE, 'delete_user'),
+        Route('/<username:str>', PUT, 'update_user',
+              password=PostArg(default=None)),
         Route('/', GET, 'list_users'),
         Route('/', POST, 'create_user',
               username=PostArg(),
@@ -40,13 +42,28 @@ class UserManager (object):
     @is_admin
     def create_user(self, username, password, is_admin=0):
         '''Create a new account.'''
-        acc = Account(name=username,
+        account = Account(name=username,
                       password=passlib.encrypt(password),
                       is_admin=is_admin)
 
         return {
             'status': 'created',
-            'data': acc.to_dict()}
+            'data': account.to_dict()}
+
+    @json_response
+    @db_session
+    @is_admin_or_self
+    def update_user(self, username, password=None):
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        if password is not None:
+            account.password = passlib.encrypt(password)
+
+        return {
+            'status': 'updated',
+            'data': account.to_dict()}
 
     @json_response
     @db_session
