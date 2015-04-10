@@ -22,9 +22,8 @@ class HostManager (object):
 
     @json_response
     @db_session
-    @is_authenticated
+    @is_admin_or_self
     def list_hosts(self, username):
-        admin_or_self(username)
         account = lookup_user(username)
         if not account:
             raise NotFound()
