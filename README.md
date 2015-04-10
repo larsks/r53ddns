@@ -163,6 +163,11 @@ Available configuration options:
           }
         }
 
+## Bugs
+
+Please report bugs using the GitHub issue tracker at
+<https://github.com/larsks/r53ddns/issues>.
+
 ## License
 
 r53ddns -- dynamic dns server for Route53
