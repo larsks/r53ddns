@@ -1,13 +1,17 @@
+import logging
+import datetime
+
 from fresco import Route, GET, POST, PUT, DELETE, Response
 from fresco import PostArg, GetArg
-from fresco import context
 from fresco.exceptions import *
-import datetime
 
 import route53
 
 from ..utils import *
 from ..model import *
+
+LOG = logging.getLogger(__name__)
+
 
 class HostManager (object):
     __routes__ = [

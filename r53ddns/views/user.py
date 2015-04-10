@@ -1,11 +1,14 @@
+import logging
 from passlib.apps import custom_app_context as passlib
 
-from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
-from fresco import context
+from fresco import Route, GET, POST, PUT, DELETE, PostArg
 from fresco.exceptions import *
 
 from ..utils import *
 from ..model import *
+
+LOG = logging.getLogger(__name__)
+
 
 class UserManager (object):
     __routes__ = [

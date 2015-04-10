@@ -1,9 +1,15 @@
+import logging
+
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco import context
 from fresco.exceptions import *
 
 from ..utils import *
 from ..model import *
+
+
+LOG = logging.getLogger(__name__)
+
 
 class RootManager(object):
     __routes__ = [
