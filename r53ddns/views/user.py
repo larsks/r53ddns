@@ -1,3 +1,5 @@
+from passlib.apps import custom_app_context as passlib
+
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco import context
 from fresco.exceptions import *
@@ -39,7 +41,7 @@ class UserManager (object):
     def create_user(self, username, password, is_admin=0):
         '''Create a new account.'''
         acc = Account(name=username,
-                      password=password,
+                      password=passlib.encrypt(password),
                       is_admin=is_admin)
 
         return {

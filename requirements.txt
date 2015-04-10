@@ -2,3 +2,4 @@ fresco>=0.4.1
 pony
 decorator
 route53
+passlib

@@ -2,6 +2,7 @@ import os
 from fresco import FrescoApp
 import base64
 import logging
+from passlib.apps import custom_app_context as passlib
 
 import views
 from model import *
@@ -49,5 +50,5 @@ def extract_auth_info(request):
                  request.url, auth_name)
 
         account = lookup_user(auth_name)
-        if account and account.password == auth_pass:
+        if account and passlib.verify(auth_pass, account.password):
             request.environ['requester'] = account
