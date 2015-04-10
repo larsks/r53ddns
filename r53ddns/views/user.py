@@ -59,9 +59,3 @@ class UserManager (object):
 
         return {'status': 'deleted',
                 'data': save}
-
-    @json_response
-    @db_session
-    @is_admin
-    def debug(self):
-        return context.request.environ
