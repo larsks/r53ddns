@@ -50,8 +50,11 @@ class HostManager (object):
     @db_session
     @is_admin_or_self
     def update_host(self, username, hostname, address=None):
+        env = context.request.environ
+
         if address is None:
-            address = context.request.environ['REMOTE_ADDR']
+            address = env.get('HTTP_X_FORWARDED_FOR',
+                              env['REMOTE_ADDR'])
 
         account = lookup_user(username)
         if not account:
