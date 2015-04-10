@@ -31,6 +31,10 @@ app.include('/', views.RootManager())
 @app.process_request
 @db_session
 def extract_auth_info(request):
+    '''This runs at the beginning of each request and provisions
+    a `requester` key in request.environ if the client has provided valid
+    credentials.'''
+
     auth = request.get_header('authorization')
 
     if not auth:

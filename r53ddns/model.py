@@ -14,6 +14,8 @@ db = Database()
 
 
 class Account(db.Entity):
+    '''A user account for accessing this web service.'''
+
     id = PrimaryKey(int, auto=True)
     created = Required(datetime,
                        default=datetime.utcnow)
@@ -24,6 +26,9 @@ class Account(db.Entity):
 
 
 class Credentials(db.Entity):
+    '''A set of credentials for accessing AWS services (in particular,
+    Route53).'''
+
     id = PrimaryKey(int, auto=True)
     owner = Required(Account)
     name = Optional(str)
@@ -38,6 +43,9 @@ class Credentials(db.Entity):
 
 
 class Host(db.Entity):
+    '''Associates a hostname with the set of credentials that should be
+    used for updates.'''
+
     id = PrimaryKey(int, auto=True)
     credentials = Required(Credentials)
     zone = Required(str)
@@ -51,11 +59,14 @@ class Host(db.Entity):
 
 
 def setup_database(path):
+    '''Bind the database to a particular driver.'''
     db.bind('sqlite', path, create_db=True)
     db.generate_mapping(create_tables=True)
 
 
 def lookup_user(name_or_id):
+    '''Look up a user by name or id.  If name_or_id is numeric it will be
+    treated as an id, other we look for user accounts by name.'''
     if name_or_id.isdigit():
         return Account[int(name_or_id)]
     else:
@@ -64,6 +75,9 @@ def lookup_user(name_or_id):
 
 
 def lookup_credentials_for(account, name_or_id):
+    '''Find a credential set by name or id that is associated with the
+    given account.  If name_or_id is numeric it will be treated as an
+    id.'''
     if name_or_id.isdigit():
         return get(c for c in Credentials
                    if c.owner.id == account.id and
@@ -75,6 +89,8 @@ def lookup_credentials_for(account, name_or_id):
 
 
 def lookup_host_for(account, name_or_id):
+    '''Find a host record by name or id that is associated with the given
+    account.  If name_or_id is numeric it will be treated as an id.'''
     if name_or_id.isdigit():
         return get(h for h in Host
                    if h.credentials.owner.id == account.id and
@@ -83,6 +99,12 @@ def lookup_host_for(account, name_or_id):
         return get(h for h in Host
                    if h.credentials.owner.id == account.id and
                    h.name == name_or_id)
+
+get.__doc__ = '''A Pony ORM method for obtaining a single result for the
+database.'''
+
+select.__doc__ = '''A Pony ORM method for obtaining multiple results from
+the database.'''
 
 if __name__ == '__main__':
     import sys

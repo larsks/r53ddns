@@ -11,6 +11,8 @@ LOG = logging.getLogger(__name__)
 
 
 class UserManager (object):
+    '''A class for managing user accounts.'''
+
     __routes__ = [
         Route('/debug', GET, 'debug'),
         Route('/<username:str>', GET, 'get_user'),
@@ -28,6 +30,7 @@ class UserManager (object):
     @db_session
     @is_admin
     def list_users(self):
+        '''Return a list of all user accounts. Requires admin access.'''
         return [acc.to_dict() for acc in
                 select(x for x in Account)]
 
@@ -35,6 +38,9 @@ class UserManager (object):
     @db_session
     @is_admin_or_self
     def get_user(self, username):
+        '''Return information about a specific account.  You must either
+        have admin access or be requesting information for the account with
+        which you are currently authenticated.'''
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -44,7 +50,7 @@ class UserManager (object):
     @db_session
     @is_admin
     def create_user(self, username, password, is_admin=0):
-        '''Create a new account.'''
+        '''Create a new account.  Requires admin access.'''
         account = Account(name=username,
                       password=passlib.encrypt(password),
                       is_admin=is_admin)
@@ -57,6 +63,8 @@ class UserManager (object):
     @db_session
     @is_admin_or_self
     def update_user(self, username, password=None):
+        '''Update attributes on a user account. You must either have admin
+        access or be modifying the account with which you authenticated.'''
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -72,6 +80,8 @@ class UserManager (object):
     @db_session
     @is_admin_or_self
     def delete_user(self, username):
+        '''Delete a user account. You must either have admin access or be
+        deleting the account with which you authenticated.'''
         account = lookup_user(username)
         if not account:
             raise NotFound()
