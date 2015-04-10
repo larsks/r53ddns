@@ -40,9 +40,9 @@ class HostManager (object):
         if not account:
             raise NotFound()
 
-        host = get(h for h in Host
-                   if h.credentials.owner.id == account.id and
-                   h.name == hostname)
+        host = lookup_host_for(account, hostname)
+        if not host:
+            raise NotFound()
 
         return host.to_dict()
 
@@ -57,10 +57,7 @@ class HostManager (object):
         if not account:
             raise NotFound()
 
-        host = get(h for h in Host
-                   if h.credentials.owner.id == account.id and
-                   h.name == hostname)
-
+        host = lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
