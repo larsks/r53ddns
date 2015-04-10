@@ -15,6 +15,16 @@ locally using, for example, [gunicorn][]:
 [openshift]: https://www.openshift.com/
 [gunicorn]: http://gunicorn.org/
 
+## Security
+
+This application uses HTTP basic authentication.  You should only
+access this application over an SSL encrypted connection with
+certificate verification.
+
+Passwords are hashed and salted on the server using the [passlib][]
+module's default configuration (which, on 64 bit systems, is 6 rounds
+of SHA512-Crypt).
+
 ## API
 
 ### POST /user/
@@ -94,7 +104,7 @@ Available configuration options:
 
 - Create a new user account.
 
-        $ curl http://r53ddns.example.com/user/ \
+        $ curl https://r53ddns.example.com/user/ \
           -d username=lars -d password=macaroni \
           -u admin:secret
         {
@@ -110,7 +120,7 @@ Available configuration options:
 
 - Add a set of AWS credentials:
 
-        $ curl http://r53ddns.example.com/user/lars/credentials/ \
+        $ curl https://r53ddns.example.com/user/lars/credentials/ \
           -d accesskey=123456 \
           -d secretkey=abcdef \
           -d label=default \
@@ -128,7 +138,7 @@ Available configuration options:
 
 - Add a host record:
 
-        $ curl http://r53ddns.example.com/user/lars/host/ \
+        $ curl https://r53ddns.example.com/user/lars/host/ \
           -d hostname=r53-test.oddbit.com \
           -d credentials=default \
           -u lars:macaroni
@@ -144,7 +154,7 @@ Available configuration options:
 
 - Update the address in AWS Route53:
 
-        $ curl http://r53ddns.example.com/user/lars/host/r53-test.oddbit.com/update \
+        $ curl https://r53ddns.example.com/user/lars/host/r53-test.oddbit.com/update \
           -u lars:macaroni
         {
           "status": "updated", 
