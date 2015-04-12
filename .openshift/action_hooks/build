@@ -1,0 +1,6 @@
+#!/bin/sh
+
+. $OPENSHIFT_DEPENDENCIES_DIR/python/virtenv/bin/activate
+
+pip install git+git://github.com/ponyorm/pony@orm
+
