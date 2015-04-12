@@ -30,7 +30,6 @@ class UserManager (object):
     '''A class for managing user accounts.'''
 
     __routes__ = [
-        Route('/debug', GET, 'debug'),
         Route('/<username:str>', GET, 'get_user'),
         Route('/<username:str>', DELETE, 'delete_user'),
         Route('/<username:str>', PUT, 'update_user',
@@ -68,8 +67,8 @@ class UserManager (object):
     def create_user(self, username, password, is_admin=0):
         '''Create a new account.  Requires admin access.'''
         account = Account(name=username,
-                      password=passlib.encrypt(password),
-                      is_admin=is_admin)
+                          password=passlib.encrypt(password),
+                          is_admin=is_admin)
 
         return account.to_dict(exclude='password')
 
