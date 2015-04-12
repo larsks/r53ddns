@@ -36,10 +36,14 @@ class RootManager(object):
 
     @json_response
     def index(self):
+        username = context.request.environ.get(
+            'auth_name', '{username}')
         return {
             'documentation': 'http://docs.r53ddns.apiary.io/',
             'endpoints': {
                 'users': '/users',
+                'host': '/user/%s/host/' % username,
+                'credentials': '/user/%s/credentials/' % username,
             },
         }
 
