@@ -47,7 +47,7 @@ class UserManager (object):
     @is_admin
     def list_users(self):
         '''Return a list of all user accounts. Requires admin access.'''
-        return [account.to_dict() for account in
+        return [account.to_dict(exclude='password') for account in
                 select(account for account in Account)]
 
     @json_response
@@ -60,7 +60,7 @@ class UserManager (object):
         account = lookup_user(username)
         if not account:
             raise NotFound()
-        return account.to_dict()
+        return account.to_dict(exclude='password')
 
     @json_response
     @db_session
@@ -71,7 +71,7 @@ class UserManager (object):
                       password=passlib.encrypt(password),
                       is_admin=is_admin)
 
-        return account.to_dict()
+        return account.to_dict(exclude='password')
 
     @json_response
     @db_session
@@ -86,7 +86,7 @@ class UserManager (object):
         if password is not None:
             account.password = passlib.encrypt(password)
 
-        return account.to_dict()
+        return account.to_dict(exclude='password')
 
     @json_response
     @db_session
@@ -98,7 +98,7 @@ class UserManager (object):
         if not account:
             raise NotFound()
 
-        save = account.to_dict()
+        save = account.to_dict(exclude='password')
         account.delete()
 
         return save
