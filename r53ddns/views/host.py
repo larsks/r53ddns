@@ -37,7 +37,10 @@ class HostManager (object):
               hostname=PostArg(),
               zone=PostArg(default=None)),
         Route('/<hostname:str>', GET, 'get_host'),
-        Route('/<hostname:str>/update', GET, 'update_host',
+        Route('/<hostname:str>', DELETE, 'delete_host'),
+        Route('/<hostname:str>', PUT, 'update_host',
+              credentials=PostArg(default=None)),
+        Route('/<hostname:str>/update', GET, 'update_host_address',
               address=GetArg(default=None)),
     ]
 
@@ -70,7 +73,23 @@ class HostManager (object):
     @json_response
     @db_session
     @is_admin_or_self
-    def update_host(self, username, hostname, address=None):
+    def delete_host(self, username, hostname):
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        host = lookup_host_for(account, hostname)
+        if not host:
+            raise NotFound()
+
+        save = host.to_dict()
+        host.delete()
+        return save
+
+    @json_response
+    @db_session
+    @is_admin_or_self
+    def update_host_address(self, username, hostname, address=None):
         if address is None:
             address = remote_addr()
 
@@ -131,5 +150,26 @@ class HostManager (object):
             credentials=cred,
             zone=zone,
             name=hostname)
+
+        return host.to_dict()
+
+    @json_response
+    @db_session
+    @is_admin_or_self
+    def update_host(self, username, hostname,
+                    credentials=None):
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        host = lookup_host_for(account, hostname)
+        if not host:
+            raise NotFound()
+
+        if credentials is not None:
+            cred = lookup_credentials_for(account, credentials)
+            if not cred:
+                raise NotFound()
+            host.credentials = cred
 
         return host.to_dict()

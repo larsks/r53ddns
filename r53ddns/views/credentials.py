@@ -31,8 +31,12 @@ class CredentialManager (object):
         Route('/', POST, 'create_credentials',
               accesskey=PostArg(),
               secretkey=PostArg(),
-              label=PostArg()),
+              label=PostArg(default=None)),
         Route('/<id:str>', GET, 'get_credentials'),
+        Route('/<id:str>', PUT, 'update_credentials',
+              accesskey=PostArg(default=None),
+              secretkey=PostArg(default=None),
+              label=PostArg(default=None)),
         Route('/<id:str>', DELETE, 'delete_credentials'),
     ]
 
@@ -75,6 +79,28 @@ class CredentialManager (object):
         cred = lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
+
+        return cred.to_dict()
+
+    @json_response
+    @db_session
+    @is_admin_or_self
+    def update_credentials(self, username, id,
+                           accesskey=None, secretkey=None, label=None):
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        cred = lookup_credentials_for(account, id)
+        if not cred:
+            raise NotFound()
+
+        if accesskey is not None:
+            cred.secrekey = accesskey
+        if secretkey is not None:
+            cred.secrekey = secretkey
+        if label is not None:
+            cred.name = label
 
         return cred.to_dict()
 
