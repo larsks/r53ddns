@@ -1,0 +1,182 @@
+# r53ddns API
+
+## API Root [/]
+
+### Get a list of available API endpoints [GET]
+
++ Response 200 (text/json)
+
+        {
+          "endpoints": {
+            "credentials": "/user/{username}/credentials/", 
+            "host": "/user/{username}/host/", 
+            "user": "/user"
+          }, 
+          "documentation": "http://docs.r53ddns.apiary.io/"
+        }
+
+## Client ip address [/ip]
+
++ Response 200 (text/plain)
+
+        127.0.0.1
+
+### Get the client ip address [GET]
+
+The ip address of the client from the perspective of the server.
+
++ Response 200 (text/plain)
+
+        127.0.0.1
+
+## User account collection [/user/]
+
+A user account object has the follow attributes:
+
++ id
++ name
++ password -- this is a write-only attribute.  The password is stored
+  hashed and salted.
++ is\_admin -- a boolean indicating whether or not the user has
+  administrative privileges.
+
+### List available user accounts [GET]
+
++ Response 200 (text/json)
+
+        [
+          {
+            "is_admin": false, 
+            "id": 1, 
+            "name": "bob", 
+            "created": "2015-04-09 20:56:19.940569"
+          }, 
+          {
+            "is_admin": false, 
+            "id": 3, 
+            "name": "alice", 
+            "created": "2015-04-10 01:48:43.806573"
+          }
+        ]
+
+### Create a new user account [POST]
+
++ Attributes
+
+    + username: `bob` (string, required)
+    + password: `secret` (string, required)
+    + is\_admin: `1` (boolean, optional)
+        + Default: `0`
+
++ Response 200 (text/json)
+
+        {
+          "is_admin": false, 
+          "id": 1, 
+          "name": "bob", 
+          "created": "2015-04-09 20:56:19.940569"
+        } 
+
+## User [/user/{username}]
+
+Retrieve information about a specific user.  `{username}` may be
+specified as either a name or numeric id.
+
++ Parameters
+
+    + username: `bob` (string, required) - A user name or numeric id
+
+### Get information about a user account [GET]
+
++ Response 200 (text/json)
+
+        {
+          "is_admin": false, 
+          "id": 1, 
+          "name": "bob", 
+          "created": "2015-04-09 20:56:19.940569"
+        } 
+
+### Update password for a user account [PUT]
+
++ Attributes
+
+    + password
+
++ Response 200 (text/json)
+
+        {
+          "is_admin": false, 
+          "id": 1, 
+          "name": "bob", 
+          "created": "2015-04-09 20:56:19.940569"
+        } 
+
+### Delete a user account [DELETE]
+
++ Response 200 (text/json)
+
+        {
+          "is_admin": false, 
+          "id": 1, 
+          "name": "bob", 
+          "created": "2015-04-09 20:56:19.940569"
+        } 
+
+## Host collection [/user/{username}/host/]
+
++ Parameters
+
+  + username: `bob` (string, required)
+
+### List available hosts [GET]
+
+### Create a new host record [POST]
+
+## Host [/user/{username}/host/{hostname}]
+
++ Parameters
+
+  + username: `bob` (string, required)
+  + hostname: `host.example.com` (string, required)
+
+### Get information about a host [GET]
+
+### Update credentials used for a host [PUT]
+
+### Delete a host [DELETE]
+
+## Host address [/user/{username}/host/{hostname}/address]
+
++ Parameters
+
+  + username: `bob` (string, required)
+  + hostname: `host.example.com` (string, required)
+
+### Get last host address [GET]
+
+### Update address for a host [POST]
+
+## Credentials collection [/user/{username}/credentials/]
+
++ Parameters
+
+  + username: `bob` (string, required)
+
+### Get all credentials belong to a user [GET]
+
+### Create a new set of credentials [POST]
+
+## Credentials [/user/{username}/credentials/{credentials_name}]
+
++ Parameters
+
+  + username: `bob` (string, required)
+  + credentials_name: `default` (string, required)
+
+### Get information about a set of credentials [GET]
+
+### Update accesskey or secretkey [PUT]
+
+### Delete a set of credentials [DELETE]
+
