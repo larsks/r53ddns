@@ -4,6 +4,12 @@ This is simple web service that will update addresses in Amazon's
 Route53 DNS service.  It supports multiple users, multiple sets of AWS
 credentials per use, and multiple managed hostnames per user.
 
+**NB** r53dns needs a version of [pony][] that includes 
+[commit c579cba][], which at the time of this writing is only
+available when installing from git.
+
+[commit c579cba]: https://github.com/ponyorm/pony/commit/c579cba754a7d8764d91bc5f1bbcfd74c6d24a1b
+
 ## Usage
 
 `r53ddns.app.app` is a standard Python WSGI application.  This
