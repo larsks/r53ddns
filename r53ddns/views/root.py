@@ -47,7 +47,10 @@ class RootManager(object):
     @db_session
     @is_admin
     def debug(self):
+        '''Dumps the WSGI environment as a JSON document.'''
         return context.request.environ
 
     def ip(self):
+        '''Return the ip address of the client (from the perspective
+        of this service).'''
         return Response(remote_addr() + '\n')
