@@ -41,7 +41,7 @@ class RootManager(object):
         return {
             'documentation': 'http://docs.r53ddns.apiary.io/',
             'endpoints': {
-                'users': '/users',
+                'user': '/user',
                 'host': '/user/%s/host/' % username,
                 'credentials': '/user/%s/credentials/' % username,
             },
