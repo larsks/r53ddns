@@ -34,9 +34,14 @@ class RootManager(object):
         Route('/ip', GET, 'ip'),
     ]
 
+    @json_response
     def index(self):
-        return Response('R53DDNS (http://github.com/larsks/r53ddns)\n',
-                        content_type='text/plain')
+        return {
+            'documentation': 'http://docs.r53ddns.apiary.io/',
+            'endpoints': {
+                'users': '/users',
+            },
+        }
 
     @json_response
     @db_session
