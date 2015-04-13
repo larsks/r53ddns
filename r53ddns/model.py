@@ -50,7 +50,8 @@ class Credentials(db.Entity):
     name = Optional(str)
     accesskey = Required(str)
     secretkey = Required(str)
-    hosts = Set("Host")
+    hosts = Set("Host",
+                cascade_delete=False)
     created = Required(datetime,
                        default=datetime.utcnow)
 
