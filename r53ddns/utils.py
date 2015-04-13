@@ -38,8 +38,18 @@ def json_dumps_helper(data):
 
 @decorator
 def json_response(func, *args, **kwargs):
+    '''Serializes the response from the wrapped function using JSON.  If
+    the function returns a tuple, assume that the first item is a desired
+    HTTP status code and the second item contains the response data.'''
+
     res = func(*args, **kwargs)
+    if isinstance(res, tuple):
+        status, res = res
+    else:
+        status = 200
+
     return Response(json.dumps(res, indent=2, default=json_dumps_helper),
+                    status=status,
                     content_type='application/json')
 
 

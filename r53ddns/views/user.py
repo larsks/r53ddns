@@ -76,7 +76,7 @@ class UserManager (object):
         except pony.orm.TransactionIntegrityError:
             raise Conflict()
 
-        return account.to_dict(exclude='password')
+        return (201, account.to_dict(exclude='password'))
 
     @json_response
     @db_session

@@ -175,7 +175,7 @@ class HostManager (object):
         except pony.orm.TransactionIntegrityError:
             raise Conflict()
 
-        return host.to_dict()
+        return (201, host.to_dict())
 
     @json_response
     @db_session

@@ -71,7 +71,7 @@ class CredentialManager (object):
         except pony.orm.TransactionIntegrityError:
             raise Conflict()
 
-        return cred.to_dict()
+        return (201, cred.to_dict())
 
     @json_response
     @db_session
