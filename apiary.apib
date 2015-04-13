@@ -1,4 +1,8 @@
+FORMAT: 1A
+
 # r53ddns API
+
+# Group Root
 
 ## API Root [/]
 
@@ -17,32 +21,28 @@
 
 ## Client ip address [/ip]
 
-+ Response 200 (text/plain)
-
-        127.0.0.1
-
 ### Get the client ip address [GET]
 
-The ip address of the client from the perspective of the server.
+Returns the ip address of the client from the perspective of the
+server.
 
 + Response 200 (text/plain)
 
         127.0.0.1
+
+# Group User
+
+A user has the following attributes:
+
+- `id`
+- `name`
+- `password`
+- `created`
+- `is_admin`
 
 ## User account collection [/user/]
 
-A user account object has the follow attributes:
-
-+ id
-+ name
-+ password -- this is a write-only attribute.  The password is stored
-  hashed and salted.
-+ is\_admin -- a boolean indicating whether or not the user has
-  administrative privileges.
-
-### List available user accounts [GET]
-
-+ Response 200 (text/json)
++ Model (text/json)
 
         [
           {
@@ -59,23 +59,30 @@ A user account object has the follow attributes:
           }
         ]
 
+### List available user accounts [GET]
+
++ Response 200
+
+    [User account collection][]
+
 ### Create a new user account [POST]
 
-+ Attributes
++ Request (application/x-www-form-urlencoded)
 
-    + username: `bob` (string, required)
-    + password: `secret` (string, required)
-    + is\_admin: `1` (boolean, optional)
-        + Default: `0`
+    + Attributes
 
-+ Response 200 (text/json)
+        + username (string, required)
+        + password (string, required)
+        + is_admin (boolean, optional)
+            + Default: 0
 
-        {
-          "is_admin": false, 
-          "id": 1, 
-          "name": "bob", 
-          "created": "2015-04-09 20:56:19.940569"
-        } 
+    + Body
+
+            username=bob&password=secret&is_admin=0
+
++ Response 200
+
+    [User][]
 
 ## User [/user/{username}]
 
@@ -84,99 +91,294 @@ specified as either a name or numeric id.
 
 + Parameters
 
-    + username: `bob` (string, required) - A user name or numeric id
+    + username (string, required) - A user name or numeric id
+
++ Model (text/json)
+
+        {
+          "is_admin": false, 
+          "id": 1, 
+          "name": "bob", 
+          "created": "2015-04-09 20:56:19.940569"
+        } 
 
 ### Get information about a user account [GET]
 
-+ Response 200 (text/json)
++ Response 200
 
-        {
-          "is_admin": false, 
-          "id": 1, 
-          "name": "bob", 
-          "created": "2015-04-09 20:56:19.940569"
-        } 
+    [User][]
 
 ### Update password for a user account [PUT]
 
-+ Attributes
++ Request (application/x-www-form-urlencoded)
 
-    + password
+    + Attributes
 
-+ Response 200 (text/json)
+        + password (string, required)
 
-        {
-          "is_admin": false, 
-          "id": 1, 
-          "name": "bob", 
-          "created": "2015-04-09 20:56:19.940569"
-        } 
+    + Body
+
+            password=secret
+
++ Response 200
+
+    [User][]
 
 ### Delete a user account [DELETE]
 
-+ Response 200 (text/json)
++ Response 200
 
-        {
-          "is_admin": false, 
-          "id": 1, 
-          "name": "bob", 
-          "created": "2015-04-09 20:56:19.940569"
-        } 
+    [User][]
 
-## Host collection [/user/{username}/host/]
+# Group Credentials
 
-+ Parameters
+A credential set has the following attributes:
 
-  + username: `bob` (string, required)
-
-### List available hosts [GET]
-
-### Create a new host record [POST]
-
-## Host [/user/{username}/host/{hostname}]
-
-+ Parameters
-
-  + username: `bob` (string, required)
-  + hostname: `host.example.com` (string, required)
-
-### Get information about a host [GET]
-
-### Update credentials used for a host [PUT]
-
-### Delete a host [DELETE]
-
-## Host address [/user/{username}/host/{hostname}/address]
-
-+ Parameters
-
-  + username: `bob` (string, required)
-  + hostname: `host.example.com` (string, required)
-
-### Get last host address [GET]
-
-### Update address for a host [POST]
+- `id`
+- `name`
+- `accesskey`
+- `secretkey`
+- `created`
+- `owner`
 
 ## Credentials collection [/user/{username}/credentials/]
 
 + Parameters
 
-  + username: `bob` (string, required)
+  + username (string, required)
 
-### Get all credentials belong to a user [GET]
++ Model (text/json)
+
+        [
+          {
+            "name": "default", 
+            "created": "2015-04-09 20:56:20.066008", 
+            "accesskey": "foo", 
+            "secretkey": "1234", 
+            "owner": 1, 
+            "id": 1
+          }, 
+          {
+            "name": "testing", 
+            "created": "2015-04-12 17:29:15.705465", 
+            "accesskey": "bar", 
+            "secretkey": "5678", 
+            "owner": 1, 
+            "id": 2
+          }
+        ]
+
+### Get all credentials belonging to a user [GET]
+
++ Response 200
+
+    [Credentials collection][]
 
 ### Create a new set of credentials [POST]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + label (string, optional)
+        + accesskey (string, required)
+        + secretkey (string, required)
+
+    + Body
+
+            accesskey=bar&secretkey=5678&label=testing
+
++ Response 200
+
+    [Credentials][]
 
 ## Credentials [/user/{username}/credentials/{credentials_name}]
 
 + Parameters
 
-  + username: `bob` (string, required)
-  + credentials_name: `default` (string, required)
+  + username (string, required)
+  + credentials_name (string, required)
+
++ Model (text/json)
+
+        {
+          "name": "testing", 
+          "created": "2015-04-12 17:29:15.705465", 
+          "accesskey": "bar", 
+          "secretkey": "5678", 
+          "owner": 1, 
+          "id": 2
+        }
 
 ### Get information about a set of credentials [GET]
 
++ Response 200
+
+    [Credentials][]
+
 ### Update accesskey or secretkey [PUT]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + accesskey (string, optional)
+        + secretkey (string, optional)
+
+    + Body
+
+            accesskey=foo&secretkey=1111
+
++ Response 200
+
+    [Credentials][]
 
 ### Delete a set of credentials [DELETE]
 
++ Response 200
+
+    [Credentials][]
+
+# Group Host
+
+A host has the following attributes:
+
+- `id`
+- `name`
+- `zone`
+- `created`
+- `last_update`
+- `credentials`
+
+## Host collection [/user/{username}/host/]
+
++ Parameters
+
+  + username (string, required)
+
++ Model (text/json)
+
+        [
+          {
+            "name": "host.example.com", 
+            "zone": "example.com", 
+            "created": "2015-04-12 20:02:39.441219", 
+            "last_update": "2015-04-12 23:31:59.742794", 
+            "credentials": 1, 
+            "id": 1, 
+            "last_address": "10.10.10.10"
+          }
+        ]
+
+### List available hosts [GET]
+
++ Response 200
+
+    [Host collection][]
+
+### Create a new host record [POST]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + hostname (string, required)
+        + zone (string, optional)
+        + credentials (string, required)
+
+    + Body
+
+            name=host.example.com&credentials=1
+
++ Response 200
+
+    [Host][]
+
+## Host [/user/{username}/host/{hostname}]
+
++ Parameters
+
+  + username (string, required)
+  + hostname (string, required)
+
++ Model (text/json)
+
+        {
+          "name": "host.example.com", 
+          "zone": "example.com", 
+          "created": "2015-04-12 20:02:39.441219", 
+          "last_update": "2015-04-12 23:31:59.742794", 
+          "credentials": 1, 
+          "id": 1, 
+          "last_address": ""
+        }
+
+### Get information about a host [GET]
+
++ Response 200
+
+    [Host][]
+
+### Update credentials used for a host [PUT]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + credentials (string, required)
+
+    + Body
+
+            credentials=2
+
++ Response 200
+
+    [Host][]
+
+### Delete a host [DELETE]
+
++ Response 200
+
+    [Host][]
+
+## Host address [/user/{username}/host/{hostname}/address]
+
++ Parameters
+
+    + username (string, required)
+    + hostname (string, required)
+
+### Get last host address [GET]
+
++ Response 200 (text/plain)
+
+        10.10.10.10
+
+### Update address for a host [POST]
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + address (string, required) - This may be an ip address in
+          dotted-quad notation, or the string `auto`, in which case
+          the address used will be the ip address of the connecting
+          client.
+
+    + Body
+
+            address=10.10.10.10
+
++ Response 200 (text/json)
+
+        {
+          "name": "host.example.com",
+          "zone": "example.com", 
+          "created": "2015-04-12 20:02:39.441219", 
+          "last_update": "2015-04-13 01:53:18.375219", 
+          "credentials": 1, 
+          "id": 1, 
+          "last_address": "10.10.10.10"
+        }
+
+<!-- vim: set ft=markdown : -->
