@@ -37,16 +37,22 @@ class HostManager (object):
     __routes__ = [
         Route('/', GET, 'list_hosts'),
         Route('/', POST, 'create_host',
-              credentials=PostArg(),
-              hostname=PostArg(),
-              zone=PostArg(default=None)),
+              kwargs={
+                  'credentials': PostArg(),
+                  'name': PostArg(),
+                  'zone': PostArg(default=None),
+              }),
         Route('/<hostname:str>', GET, 'get_host'),
         Route('/<hostname:str>', DELETE, 'delete_host'),
         Route('/<hostname:str>', PUT, 'update_host',
-              credentials=PostArg(default=None)),
+              kwargs={
+                  'credentials': PostArg(default=None),
+              }),
         Route('/<hostname:str>/address', GET, 'get_host_address'),
         Route('/<hostname:str>/address', POST, 'update_host_address',
-              address=PostArg(default=None)),
+              kwargs={
+                'address': PostArg(default=None),
+              }),
     ]
 
     @json_response
@@ -154,7 +160,7 @@ class HostManager (object):
     @json_response
     @db_session
     @is_admin_or_self
-    def create_host(self, username, hostname, credentials, zone=None):
+    def create_host(self, username, name, credentials, zone=None):
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -164,13 +170,13 @@ class HostManager (object):
             raise NotFound()
 
         if zone is None:
-            zone = '.'.join(hostname.split('.')[1:])
+            zone = '.'.join(name.split('.')[1:])
 
         try:
             host = Host(
                 credentials=cred,
                 zone=zone,
-                name=hostname)
+                name=name)
             host.flush()
         except pony.orm.TransactionIntegrityError:
             raise Conflict()

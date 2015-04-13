@@ -91,14 +91,14 @@ A user has the following attributes:
 
     + Attributes
 
-        + username (string, required)
+        + name (string, required)
         + password (string, required)
         + is_admin (boolean, optional)
             + Default: 0
 
     + Body
 
-            username=bob&password=secret&is_admin=0
+            name=bob&password=secret&is_admin=0
 
 + Response 200
 
@@ -214,13 +214,13 @@ A credential set has the following attributes:
 
     + Attributes
 
-        + label (string, optional)
+        + name (string, optional)
         + accesskey (string, required)
         + secretkey (string, required)
 
     + Body
 
-            accesskey=bar&secretkey=5678&label=testing
+            accesskey=bar&secretkey=5678&name=testing
 
 + Response 200
 
@@ -273,13 +273,19 @@ A credential set has the following attributes:
 
 ### Delete a set of credentials [DELETE]
 
-[ **ADMIN** **SELF** ] Deletes a set of credentials. Note that this
-will also delete any host entries that make use of the given
-credentials.
+[ **ADMIN** **SELF** ] Deletes a set of credentials. You cannot delete
+credentials that are associated with one or more host records; you
+will need to update (or delete) the host records first.  An attempt to
+delete credentials that are still in use will result in a `409
+Conflict` response.
 
 + Response 200
 
     [Credentials][]
+
++ Response 409 (text/html)
+
+        Conflict
 
 # Group Host
 
@@ -328,7 +334,7 @@ A host has the following attributes:
 
     + Attributes
 
-        + hostname (string, required)
+        + name (string, required)
         + zone (string, optional)
         + credentials (string, required)
 

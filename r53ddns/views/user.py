@@ -32,15 +32,23 @@ class UserManager (object):
     '''A class for managing user accounts.'''
 
     __routes__ = [
+        Route('/', GET, 'list_users'),
+        Route('/', POST, 'create_user',
+              kwargs={
+                  'name': PostArg(),
+                  'password': PostArg(),
+                  'is_admin': PostArg(int, default=0),
+              }),
         Route('/<username:str>', GET, 'get_user'),
         Route('/<username:str>', DELETE, 'delete_user'),
         Route('/<username:str>', PUT, 'update_user',
-              password=PostArg(default=None)),
-        Route('/', GET, 'list_users'),
-        Route('/', POST, 'create_user',
-              username=PostArg(),
-              password=PostArg(),
-              is_admin=PostArg(int, default=0)),
+              kwargs={
+                  'password': PostArg(default=None),
+              }),
+        Route('/<username:str>/admin', PUT, 'update_user_admin',
+              kwargs={
+                  'is_admin': PostArg(int),
+              }),
     ]
 
     @json_response
@@ -66,10 +74,10 @@ class UserManager (object):
     @json_response
     @db_session
     @is_admin
-    def create_user(self, username, password, is_admin=0):
+    def create_user(self, name, password, is_admin=0):
         '''Create a new account.  Requires admin access.'''
         try:
-            account = Account(name=username,
+            account = Account(name=name,
                               password=passlib.encrypt(password),
                               is_admin=is_admin)
             account.flush()
@@ -91,6 +99,18 @@ class UserManager (object):
         if password is not None:
             account.password = passlib.encrypt(password)
 
+        return account.to_dict(exclude='password')
+
+    @json_response
+    @db_session
+    @is_admin
+    def update_user_admin(self, username, is_admin):
+        '''Update is_admin field for a user account.'''
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        account.is_admin = is_admin
         return account.to_dict(exclude='password')
 
     @json_response

@@ -31,14 +31,18 @@ class CredentialManager (object):
     __routes__ = [
         Route('/', GET, 'list_credentials'),
         Route('/', POST, 'create_credentials',
-              accesskey=PostArg(),
-              secretkey=PostArg(),
-              label=PostArg(default=None)),
+              kwargs={
+                  'accesskey': PostArg(),
+                  'secretkey': PostArg(),
+                  'name': PostArg(default=None),
+              }),
         Route('/<id:str>', GET, 'get_credentials'),
         Route('/<id:str>', PUT, 'update_credentials',
-              accesskey=PostArg(default=None),
-              secretkey=PostArg(default=None),
-              label=PostArg(default=None)),
+              kwargs={
+                  'accesskey': PostArg(default=None),
+                  'secretkey': PostArg(default=None),
+                  'name': PostArg(default=None),
+              }),
         Route('/<id:str>', DELETE, 'delete_credentials'),
     ]
 
@@ -57,7 +61,7 @@ class CredentialManager (object):
     @json_response
     @db_session
     @is_admin_or_self
-    def create_credentials(self, username, accesskey, secretkey, label=None):
+    def create_credentials(self, username, accesskey, secretkey, name=None):
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -67,7 +71,7 @@ class CredentialManager (object):
                 owner=account,
                 accesskey=accesskey,
                 secretkey=secretkey,
-                name=label)
+                name=name)
         except pony.orm.TransactionIntegrityError:
             raise Conflict()
 
@@ -91,7 +95,7 @@ class CredentialManager (object):
     @db_session
     @is_admin_or_self
     def update_credentials(self, username, id,
-                           accesskey=None, secretkey=None, label=None):
+                           accesskey=None, secretkey=None, name=None):
         account = lookup_user(username)
         if not account:
             raise NotFound()
@@ -101,11 +105,11 @@ class CredentialManager (object):
             raise NotFound()
 
         if accesskey is not None:
-            cred.secrekey = accesskey
+            cred.accesskey = accesskey
         if secretkey is not None:
-            cred.secrekey = secretkey
-        if label is not None:
-            cred.name = label
+            cred.secretkey = secretkey
+        if name is not None:
+            cred.name = name
 
         return cred.to_dict()
 
@@ -122,6 +126,10 @@ class CredentialManager (object):
             raise NotFound()
 
         save = cred.to_dict()
-        cred.delete()
+
+        try:
+            cred.delete()
+        except pony.orm.ConstraintError:
+            raise Conflict()
 
         return save
