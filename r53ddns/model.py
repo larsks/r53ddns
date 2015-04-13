@@ -117,7 +117,7 @@ def lookup_host_for(account, name_or_id):
                    if h.credentials.owner.id == account.id and
                    h.name == name_or_id)
 
-get.__doc__ = '''A Pony ORM method for obtaining a single result for the
+get.__doc__ = '''A Pony ORM method for obtaining a single result from the
 database.'''
 
 select.__doc__ = '''A Pony ORM method for obtaining multiple results from
