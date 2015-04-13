@@ -2,11 +2,25 @@ FORMAT: 1A
 
 # r53ddns API
 
+In this api documentation, the following keywords are used to indicate
+the authentication required to access a particular resource:
+
+- **ANON** - no authentication is required to access the resource
+- **ADMIN** - requires administrative privileges
+- **AUTH** - available to any authenticated user
+- **SELF** - available only if the authenticated user matches the
+  owner of the resource
+
 # Group Root
 
 ## API Root [/]
 
 ### Get a list of available API endpoints [GET]
+
+[ **ANON** ] Returns a list of available API endpoints. If a basic
+authentication header is passed as part of the request, `{username}`
+in the response will be replaced by whatever username was specified in
+the header.
 
 + Response 200 (text/json)
 
@@ -23,8 +37,10 @@ FORMAT: 1A
 
 ### Get the client ip address [GET]
 
-Returns the ip address of the client from the perspective of the
-server.
+[ **ANON** ] Returns the ip address of the client from the perspective
+of the server.  The service respects the `X-Forwarded-For` HTTP
+header, so this should operate correctly behind a proxy server (for
+example, when running on OpenShift).
 
 + Response 200 (text/plain)
 
@@ -61,11 +77,15 @@ A user has the following attributes:
 
 ### List available user accounts [GET]
 
+[ **ADMIN** ]
+
 + Response 200
 
     [User account collection][]
 
 ### Create a new user account [POST]
+
+[ **ADMIN** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -86,8 +106,8 @@ A user has the following attributes:
 
 ## User [/user/{username}]
 
-Retrieve information about a specific user.  `{username}` may be
-specified as either a name or numeric id.
+Operations on a specific user.  `{username}` may be specified as
+either a name or numeric id.
 
 + Parameters
 
@@ -104,11 +124,17 @@ specified as either a name or numeric id.
 
 ### Get information about a user account [GET]
 
+[ **ADMIN** **SELF** ] Retrieve information about an existing user
+account.  Note that the `password` attribute is write-only and will
+never be returned via the API.
+
 + Response 200
 
     [User][]
 
 ### Update password for a user account [PUT]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -125,6 +151,10 @@ specified as either a name or numeric id.
     [User][]
 
 ### Delete a user account [DELETE]
+
+[ **ADMIN** **SELF** ] Deletes the specified user account.  If you
+delete the account you are using for authentication you will no longer
+be able to make use of the API.
 
 + Response 200
 
@@ -170,11 +200,15 @@ A credential set has the following attributes:
 
 ### Get all credentials belonging to a user [GET]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200
 
     [Credentials collection][]
 
 ### Create a new set of credentials [POST]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -212,11 +246,15 @@ A credential set has the following attributes:
 
 ### Get information about a set of credentials [GET]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200
 
     [Credentials][]
 
 ### Update accesskey or secretkey [PUT]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -234,6 +272,10 @@ A credential set has the following attributes:
     [Credentials][]
 
 ### Delete a set of credentials [DELETE]
+
+[ **ADMIN** **SELF** ] Deletes a set of credentials. Note that this
+will also delete any host entries that make use of the given
+credentials.
 
 + Response 200
 
@@ -272,11 +314,15 @@ A host has the following attributes:
 
 ### List available hosts [GET]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200
 
     [Host collection][]
 
 ### Create a new host record [POST]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -315,11 +361,15 @@ A host has the following attributes:
 
 ### Get information about a host [GET]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200
 
     [Host][]
 
 ### Update credentials used for a host [PUT]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
@@ -337,6 +387,8 @@ A host has the following attributes:
 
 ### Delete a host [DELETE]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200
 
     [Host][]
@@ -350,11 +402,15 @@ A host has the following attributes:
 
 ### Get last host address [GET]
 
+[ **ADMIN** **SELF** ]
+
 + Response 200 (text/plain)
 
         10.10.10.10
 
 ### Update address for a host [POST]
+
+[ **ADMIN** **SELF** ]
 
 + Request (application/x-www-form-urlencoded)
 
