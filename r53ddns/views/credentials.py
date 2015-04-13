@@ -16,11 +16,13 @@
 
 import logging
 
+import pony.orm
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco.exceptions import *
 
 from r53ddns.utils import *
 from r53ddns.model import *
+from r53ddns.exceptions import *
 
 LOG = logging.getLogger(__name__)
 
@@ -60,11 +62,14 @@ class CredentialManager (object):
         if not account:
             raise NotFound()
 
-        cred = Credentials(
-            owner=account,
-            accesskey=accesskey,
-            secretkey=secretkey,
-            name=label)
+        try:
+            cred = Credentials(
+                owner=account,
+                accesskey=accesskey,
+                secretkey=secretkey,
+                name=label)
+        except pony.orm.TransactionIntegrityError:
+            raise Conflict()
 
         return cred.to_dict()
 

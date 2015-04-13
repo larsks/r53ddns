@@ -16,17 +16,21 @@
 
 import logging
 import datetime
+import re
 
+import pony.orm
+import route53
 from fresco import Route, GET, POST, PUT, DELETE, Response
 from fresco import PostArg, GetArg, context
 from fresco.exceptions import *
 
-import route53
-
 from r53ddns.utils import *
 from r53ddns.model import *
+from r53ddns.exceptions import *
 
 LOG = logging.getLogger(__name__)
+
+re_ip = re.compile('\d+\.\d+\.\d+\.\d+')
 
 
 class HostManager (object):
@@ -106,6 +110,8 @@ class HostManager (object):
     def update_host_address(self, username, hostname, address=None):
         if address is None or address == 'auto':
             address = remote_addr()
+        elif not re_ip.match(address):
+            raise BadRequest()
 
         account = lookup_user(username)
         if not account:
@@ -160,10 +166,14 @@ class HostManager (object):
         if zone is None:
             zone = '.'.join(hostname.split('.')[1:])
 
-        host = Host(
-            credentials=cred,
-            zone=zone,
-            name=hostname)
+        try:
+            host = Host(
+                credentials=cred,
+                zone=zone,
+                name=hostname)
+            host.flush()
+        except pony.orm.TransactionIntegrityError:
+            raise Conflict()
 
         return host.to_dict()
 

@@ -17,11 +17,13 @@
 import logging
 from passlib.apps import custom_app_context as passlib
 
+import pony.orm
 from fresco import Route, GET, POST, PUT, DELETE, PostArg
 from fresco.exceptions import *
 
 from r53ddns.utils import *
 from r53ddns.model import *
+from r53ddns.exceptions import *
 
 LOG = logging.getLogger(__name__)
 
@@ -66,9 +68,13 @@ class UserManager (object):
     @is_admin
     def create_user(self, username, password, is_admin=0):
         '''Create a new account.  Requires admin access.'''
-        account = Account(name=username,
-                          password=passlib.encrypt(password),
-                          is_admin=is_admin)
+        try:
+            account = Account(name=username,
+                              password=passlib.encrypt(password),
+                              is_admin=is_admin)
+            account.flush()
+        except pony.orm.TransactionIntegrityError:
+            raise Conflict()
 
         return account.to_dict(exclude='password')
 
