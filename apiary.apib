@@ -160,6 +160,26 @@ be able to make use of the API.
 
     [User][]
 
+## User administrative access [/user/{username}/admin]
+
+### Update user administrative access [PUT]
+
+[ **ADMIN** ] Modify the `is_admin` flag for a user.
+
++ Request (application/x-www-form-urlencoded)
+
+    + Attributes
+
+        + is_admin (boolean, required)
+
+    + Body
+
+            is_admin=1
+
++ Response 200
+
+    [User][]
+
 # Group Credentials
 
 A credential set has the following attributes:
