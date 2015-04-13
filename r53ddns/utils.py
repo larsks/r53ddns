@@ -50,6 +50,9 @@ def _is_authenticated():
 
 @decorator
 def is_authenticated(func, *args, **kwargs):
+    '''Return an HTTP 403 (Forbidden) response if the user is not
+    authenticated.'''
+
     if not _is_authenticated():
         raise Forbidden()
 
@@ -75,6 +78,9 @@ def _is_admin():
 
 @decorator
 def is_admin(func, *args, **kwargs):
+    '''Return an HTTP 403 (Forbidden) response if the user does not have
+    administrative privileges.'''
+
     if not _is_admin():
         raise Forbidden()
 
@@ -90,6 +96,10 @@ def _is_admin_or_self(username):
 
 @decorator
 def is_admin_or_self(func, *args, **kwargs):
+    '''Return an HTTP 403 (Forbidden) response if the user is not an
+    administrator AND is trying to access a resource not owned by the
+    requesting user.'''
+
     if not _is_admin_or_self(args[1]):
         raise Forbidden()
 
@@ -97,8 +107,9 @@ def is_admin_or_self(func, *args, **kwargs):
 
 
 def remote_addr():
-    env = context.request.environ
+    '''Return the client address, respecting the X-Forwarded-For header.'''
 
+    env = context.request.environ
     address = env.get('HTTP_X_FORWARDED_FOR',
                       env['REMOTE_ADDR'])
 
