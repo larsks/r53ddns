@@ -40,8 +40,9 @@ class HostManager (object):
         Route('/<hostname:str>', DELETE, 'delete_host'),
         Route('/<hostname:str>', PUT, 'update_host',
               credentials=PostArg(default=None)),
-        Route('/<hostname:str>/update', GET, 'update_host_address',
-              address=GetArg(default=None)),
+        Route('/<hostname:str>/address', GET, 'get_host_address'),
+        Route('/<hostname:str>/address', POST, 'update_host_address',
+              address=PostArg(default=None)),
     ]
 
     @json_response
@@ -86,11 +87,24 @@ class HostManager (object):
         host.delete()
         return save
 
+    @db_session
+    @is_admin_or_self
+    def get_host_address(self, username, hostname):
+        account = lookup_user(username)
+        if not account:
+            raise NotFound()
+
+        host = lookup_host_for(account, hostname)
+        if not host:
+            raise NotFound()
+
+        return Response(host.last_address)
+
     @json_response
     @db_session
     @is_admin_or_self
     def update_host_address(self, username, hostname, address=None):
-        if address is None:
+        if address is None or address == 'auto':
             address = remote_addr()
 
         account = lookup_user(username)
