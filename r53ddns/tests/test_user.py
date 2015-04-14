@@ -6,9 +6,12 @@ import json
 from fresco.exceptions import *
 
 from r53ddns.tests.base import Base
-import r53ddns.views.user
-from r53ddns.model import *
 from r53ddns.exceptions import *
+import r53ddns.tests.fakemodel as model
+import r53ddns.views.user
+
+r53ddns.views.user.model = model
+r53ddns.views.user.TransactionIntegrityError = model.TransactionIntegrityError
 
 
 class TestUser(Base):
@@ -22,7 +25,7 @@ class TestUser(Base):
         res = json.loads(res.content)
         self.assertEqual(res[0]['name'], 'user1')
 
-    def test_get_user_name(self):
+    def test_get_user_by_name(self):
         res = self.user.get_user('user1')
         self.assertThat(res.status, StartsWith('200'))
         self.assertEqual(res.get_header('content-type'), 'application/json')
@@ -30,7 +33,9 @@ class TestUser(Base):
         self.assertEqual(res['name'], 'user1')
 
     def test_get_user_by_id(self):
-        res = self.user.get_user('0')
+        user1 = model.get(account for account in model.Account
+                          if account.name == 'user1')
+        res = self.user.get_user(str(user1.id))
         self.assertThat(res.status, StartsWith('200'))
         self.assertEqual(res.get_header('content-type'), 'application/json')
         res = json.loads(res.content)
@@ -51,24 +56,28 @@ class TestUser(Base):
         self.assertRaises(Conflict, self.user.create_user,
                           'user1', 'secret')
 
-    @db_session
     def test_update_user(self):
-        orig_password = Account[0].password
+        user1 = model.get(account for account in model.Account
+                          if account.name == 'user1')
+        orig_password = user1.password
         res = self.user.update_user('user1', password='foobar')
         self.assertThat(res.status, StartsWith('200'))
         self.assertEqual(res.get_header('content-type'),
                          'application/json')
         res = json.loads(res.content)
-        new_password = Account[0].password
+        new_password = user1.password
 
         self.assertNotEqual(orig_password, new_password)
 
     def test_update_user_admin(self):
+        user1 = model.get(account for account in model.Account
+                          if account.name == 'user1')
         res = self.user.update_user_admin('user1', True)
+        self.assertTrue(user1.is_admin)
         self.assertEqual(res.get_header('content-type'),
                          'application/json')
         res = json.loads(res.content)
-        assert(res['is_admin'])
+        self.assertTrue(res['is_admin'])
 
     def test_delete_user(self):
         self.user.delete_user('user2')
