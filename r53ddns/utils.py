@@ -82,8 +82,10 @@ def _is_admin():
     if requester is None and admin_name and admin_pass:
         if auth_name == admin_name and auth_pass == admin_pass:
             return True
-    else:
+    elif requester is not None:
         return requester.is_admin
+    else:
+        return False
 
 
 @decorator
