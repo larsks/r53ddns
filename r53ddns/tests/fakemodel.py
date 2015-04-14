@@ -1,6 +1,10 @@
 from six import with_metaclass
 
 
+class ConstraintError(Exception):
+    pass
+
+
 class TransactionIntegrityError (Exception):
     pass
 
@@ -39,6 +43,8 @@ class DBObject(with_metaclass(DBMeta, object)):
     _defaults = {}
 
     def __init__(self, **kwargs):
+        self.check_create(**kwargs)
+
         self._dict = {}
         self._dict.update(self._defaults)
         for k, v in kwargs.items():
@@ -48,12 +54,19 @@ class DBObject(with_metaclass(DBMeta, object)):
         self._oblist.append(self)
         self._obdict[self.id] = self
 
+    def check_create(self, *args, **kwargs):
+        pass
+
+    def check_delete(self):
+        pass
+
     @classmethod
     def nextid(kls):
         kls._idseq += 1
         return kls._idseq
 
     def delete(self):
+        self.check_delete()
         del self._obdict[self.id]
         self._oblist.remove(self)
 
@@ -102,14 +115,22 @@ class Account(DBObject):
         'is_admin': False,
     }
 
-    def __init__(self, *args, **kwargs):
+    def check_create(self, *args, **kwargs):
         if kwargs['name'] in [a.name for a in self._oblist]:
             raise TransactionIntegrityError()
 
-        super(Account, self).__init__(*args, **kwargs)
 
 class Credentials(DBObject):
-    pass
+    def check_create(self, *args, **kwargs):
+        if kwargs['name'] in [a.name for a in self._oblist
+                              if a.owner is kwargs['owner']]:
+            raise TransactionIntegrityError()
+
+    def check_delete(self):
+        for h in Host:
+            if h.credentials is self:
+                raise ConstraintError()
+
 
 class Host(DBObject):
     pass
