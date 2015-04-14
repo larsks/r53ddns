@@ -16,7 +16,7 @@
 
 import logging
 
-import pony.orm
+from pony.orm import TransactionIntegrityError, ConstraintError
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco.exceptions import *
 
@@ -74,7 +74,7 @@ class CredentialManager (object):
                 secretkey=secretkey,
                 name=name)
             cred.flush()
-        except pony.orm.TransactionIntegrityError:
+        except TransactionIntegrityError:
             raise Conflict()
 
         return (201, cred.to_dict())
@@ -131,7 +131,7 @@ class CredentialManager (object):
 
         try:
             cred.delete()
-        except pony.orm.ConstraintError:
+        except ConstraintError:
             raise Conflict()
 
         return save

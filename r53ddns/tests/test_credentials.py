@@ -6,9 +6,14 @@ import json
 from fresco.exceptions import *
 
 from r53ddns.tests.base import Base
-from r53ddns.model import *
+import r53ddns.tests.fakemodel as model
 from r53ddns.exceptions import *
+
 import r53ddns.views.credentials
+r53ddns.views.credentials.model = model
+r53ddns.views.credentials.TransactionIntegrityError = model.TransactionIntegrityError
+r53ddns.views.credentials.ConstraintError = model.ConstraintError
+
 
 class TestCredentials(Base):
     def setUp(self):
@@ -34,7 +39,12 @@ class TestCredentials(Base):
         self.assertEquals(res['secretkey'], 'secret')
 
     def test_get_credentials_by_id(self):
-        res = self.creds.get_credentials('user2', '1')
+        user2 = model.get(a for a in model.Account
+                          if a.name == 'user2')
+        cred = model.get(c for c in model.Credentials
+                         if c.owner == user2 and c.name == 'default')
+
+        res = self.creds.get_credentials('user2', str(cred.id))
         self.assertEqual(res.get_header('content-type'), 'application/json')
         res = json.loads(res.content)
         self.assertEquals(res['accesskey'], 'access')
