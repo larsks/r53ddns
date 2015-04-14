@@ -54,8 +54,14 @@ class TestHost(Base):
         self.assertRaises(Conflict, self.host.create_host,
                           'user3', 'host.example.com', 'default')
 
-    def test_get_host(self):
+    def test_get_host_by_name(self):
         res = self.host.get_host('user3', 'host.example.com')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res['name'], 'host.example.com')
+
+    def test_get_host_by_id(self):
+        res = self.host.get_host('user3', '1')
         self.assertEqual(res.get_header('content-type'), 'application/json')
         res = json.loads(res.content)
         self.assertEquals(res['name'], 'host.example.com')

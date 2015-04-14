@@ -22,8 +22,15 @@ class TestUser(Base):
         res = json.loads(res.content)
         self.assertEqual(res[0]['name'], 'user1')
 
-    def test_get_user(self):
+    def test_get_user_name(self):
         res = self.user.get_user('user1')
+        self.assertThat(res.status, StartsWith('200'))
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEqual(res['name'], 'user1')
+
+    def test_get_user_by_id(self):
+        res = self.user.get_user('0')
         self.assertThat(res.status, StartsWith('200'))
         self.assertEqual(res.get_header('content-type'), 'application/json')
         res = json.loads(res.content)

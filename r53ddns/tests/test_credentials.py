@@ -26,8 +26,15 @@ class TestCredentials(Base):
         self.assertRaises(NotFound, self.creds.list_credentials,
                           'does_not_exist')
 
-    def test_get_credentials(self):
+    def test_get_credentials_by_name(self):
         res = self.creds.get_credentials('user2', 'default')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res['accesskey'], 'access')
+        self.assertEquals(res['secretkey'], 'secret')
+
+    def test_get_credentials_by_id(self):
+        res = self.creds.get_credentials('user2', '1')
         self.assertEqual(res.get_header('content-type'), 'application/json')
         res = json.loads(res.content)
         self.assertEquals(res['accesskey'], 'access')
