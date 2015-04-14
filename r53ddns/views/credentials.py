@@ -51,11 +51,11 @@ class CredentialManager (object):
     @model.db_session
     @is_admin_or_self
     def list_credentials(self, username):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        creds = select(cred for cred in Credentials
+        creds = model.select(cred for cred in model.Credentials
                        if cred.owner.id == account.id)
         return [cred.to_dict() for cred in creds]
 
@@ -63,12 +63,12 @@ class CredentialManager (object):
     @model.db_session
     @is_admin_or_self
     def create_credentials(self, username, accesskey, secretkey, name=None):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
         try:
-            cred = Credentials(
+            cred = model.Credentials(
                 owner=account,
                 accesskey=accesskey,
                 secretkey=secretkey,
@@ -83,11 +83,11 @@ class CredentialManager (object):
     @model.db_session
     @is_admin_or_self
     def get_credentials(self, username, id):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
@@ -98,11 +98,11 @@ class CredentialManager (object):
     @is_admin_or_self
     def update_credentials(self, username, id,
                            accesskey=None, secretkey=None, name=None):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
@@ -119,11 +119,11 @@ class CredentialManager (object):
     @model.db_session
     @is_admin_or_self
     def delete_credentials(self, username, id):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
