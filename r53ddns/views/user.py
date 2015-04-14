@@ -56,8 +56,9 @@ class UserManager (object):
     @is_admin
     def list_users(self):
         '''Return a list of all user accounts. Requires admin access.'''
-        return [account.to_dict(exclude='password') for account in
-                select(account for account in Account)]
+        return [account.to_dict(exclude='password')
+                for account
+                in select(account for account in Account)]
 
     @json_response
     @db_session
