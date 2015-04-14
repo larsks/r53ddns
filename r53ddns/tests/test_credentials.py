@@ -1,0 +1,72 @@
+from mock import Mock
+from testtools import TestCase
+from testtools.matchers import StartsWith
+import json
+
+from fresco.exceptions import *
+
+from r53ddns.tests.base import Base
+from r53ddns.model import *
+from r53ddns.exceptions import *
+import r53ddns.views.credentials
+
+class TestCredentials(Base):
+    def setUp(self):
+        super(TestCredentials, self).setUp()
+        self.creds = r53ddns.views.credentials.CredentialManager()
+
+    def test_list_credentials(self):
+        res = self.creds.list_credentials('user2')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res[0]['accesskey'], 'access')
+        self.assertEquals(res[0]['secretkey'], 'secret')
+
+    def test_list_credentials_missing_account(self):
+        self.assertRaises(NotFound, self.creds.list_credentials,
+                          'does_not_exist')
+
+    def test_get_credentials(self):
+        res = self.creds.get_credentials('user2', 'default')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res['accesskey'], 'access')
+        self.assertEquals(res['secretkey'], 'secret')
+
+    def test_get_credentials_missing_account(self):
+        self.assertRaises(NotFound, self.creds.get_credentials,
+                          'does_not_exist', 'default')
+
+    def test_get_missing_credentials(self):
+        self.assertRaises(NotFound, self.creds.get_credentials,
+                          'user1', 'default')
+
+    def test_create_credentials(self):
+        res = self.creds.create_credentials('user1', 'access',
+                                            'secret', name='default')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res['accesskey'], 'access')
+        self.assertEquals(res['secretkey'], 'secret')
+
+    def test_create_credentials_missing_account(self):
+        self.assertRaises(NotFound, self.creds.create_credentials,
+                          'does_not_exist', 'access',
+                          'secret', name='default')
+
+    def test_create_duplicate_credentials(self):
+        self.assertRaises(Conflict, self.creds.create_credentials,
+                          'user2', 'access', 'secret', 'default')
+
+    def test_update_credentials(self):
+        res = self.creds.update_credentials('user2', 'default',
+                                            accesskey='access2',
+                                            secretkey='secret2')
+        self.assertEqual(res.get_header('content-type'), 'application/json')
+        res = json.loads(res.content)
+        self.assertEquals(res['accesskey'], 'access2')
+
+    def test_delete_credentials(self):
+        self.creds.delete_credentials('user2', 'default')
+        self.assertRaises(NotFound, self.creds.get_credentials,
+                          'user2', 'default')
