@@ -72,6 +72,7 @@ class CredentialManager (object):
                 accesskey=accesskey,
                 secretkey=secretkey,
                 name=name)
+            cred.flush()
         except pony.orm.TransactionIntegrityError:
             raise Conflict()
 
