@@ -103,10 +103,19 @@ class TestHost(Base):
                         StartsWith('text/html'))
         self.assertEquals(res.content.strip(), '1.1.1.1')
 
+    def test_get_host_address_missing_host(self):
+        self.assertRaises(NotFound, self.host.get_host_address,
+                          'user3', 'does_not_exist.example.com')
+
     def test_update_host_address_missing_host(self):
         self.assertRaises(NotFound, self.host.update_host_address,
                           'user3', 'does_not_exist.example.com',
                           address='auto')
+
+    def test_update_host_address_bad_address(self):
+        self.assertRaises(BadRequest, self.host.update_host_address,
+                          'user3', 'host.example.com',
+                          address='bad_address')
 
     def test_update_host_address_auto(self):
         res = self.host.update_host_address('user3', 'host.example.com',
