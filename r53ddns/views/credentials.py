@@ -16,13 +16,14 @@
 
 import logging
 
-import pony.orm
+from pony.orm import TransactionIntegrityError, ConstraintError
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco.exceptions import *
 
-from r53ddns.utils import *
-from r53ddns.model import *
+import r53ddns.model as model
+import r53ddns.utils as utils
 from r53ddns.exceptions import *
+from r53ddns.decorators import *
 
 LOG = logging.getLogger(__name__)
 
@@ -47,61 +48,61 @@ class CredentialManager (object):
     ]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def list_credentials(self, username):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        creds = select(cred for cred in Credentials
+        creds = model.select(cred for cred in model.Credentials
                        if cred.owner.id == account.id)
         return [cred.to_dict() for cred in creds]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def create_credentials(self, username, accesskey, secretkey, name=None):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
         try:
-            cred = Credentials(
+            cred = model.Credentials(
                 owner=account,
                 accesskey=accesskey,
                 secretkey=secretkey,
                 name=name)
             cred.flush()
-        except pony.orm.TransactionIntegrityError:
+        except TransactionIntegrityError:
             raise Conflict()
 
         return (201, cred.to_dict())
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def get_credentials(self, username, id):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
         return cred.to_dict()
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def update_credentials(self, username, id,
                            accesskey=None, secretkey=None, name=None):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
@@ -115,14 +116,14 @@ class CredentialManager (object):
         return cred.to_dict()
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def delete_credentials(self, username, id):
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = lookup_credentials_for(account, id)
+        cred = utils.lookup_credentials_for(account, id)
         if not cred:
             raise NotFound()
 
@@ -130,7 +131,7 @@ class CredentialManager (object):
 
         try:
             cred.delete()
-        except pony.orm.ConstraintError:
+        except ConstraintError:
             raise Conflict()
 
         return save

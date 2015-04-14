@@ -1,6 +1,29 @@
 from six import with_metaclass
 
 
+class ConstraintError(Exception):
+    pass
+
+
+class TransactionIntegrityError (Exception):
+    pass
+
+
+def select(i):
+    return i
+
+
+def get(i):
+    try:
+        return next(i)
+    except StopIteration:
+        pass
+
+
+def db_session(func):
+    return func
+
+
 class DBMeta(type):
     def __new__(cls, name, parents, dikt):
         dikt['_idseq'] = 0
@@ -20,6 +43,8 @@ class DBObject(with_metaclass(DBMeta, object)):
     _defaults = {}
 
     def __init__(self, **kwargs):
+        self.check_create(**kwargs)
+
         self._dict = {}
         self._dict.update(self._defaults)
         for k, v in kwargs.items():
@@ -29,18 +54,24 @@ class DBObject(with_metaclass(DBMeta, object)):
         self._oblist.append(self)
         self._obdict[self.id] = self
 
+    def check_create(self, *args, **kwargs):
+        pass
+
+    def check_delete(self):
+        pass
+
     @classmethod
     def nextid(kls):
         kls._idseq += 1
         return kls._idseq
 
     def delete(self):
+        self.check_delete()
         del self._obdict[self.id]
+        self._oblist.remove(self)
 
-        print 'BEFORE:', self._oblist
-        self._oblist = [o for o in self._oblist
-                        if o.id != self.id]
-        print 'AFTER:', self._oblist
+    def flush(self):
+        pass
 
     @classmethod
     def __classiter__(kls):
@@ -56,36 +87,56 @@ class DBObject(with_metaclass(DBMeta, object)):
         return str(self)
 
     def __getattr__(self, k):
-        try:
-            return self._dict[k]
-        except KeyError:
+        if k.startswith('_'):
             raise AttributeError(k)
+        else:
+            try:
+                return self._dict[k]
+            except KeyError:
+                raise AttributeError(k)
+
+    def __setattr__(self, k, v):
+        if k.startswith('_'):
+            super(DBObject, self).__setattr__(k, v)
+        else:
+            self._dict[k] = v
 
     def to_dict(self, *args, **kwargs):
         return self._dict
+
+    @classmethod
+    def reset(kls):
+        kls._oblist = []
+        kls._obdict = {}
+        kls._idseq = 0
 
 class Account(DBObject):
     _defaults = {
         'is_admin': False,
     }
 
+    def check_create(self, *args, **kwargs):
+        if kwargs['name'] in [a.name for a in self._oblist]:
+            raise TransactionIntegrityError()
+
+
 class Credentials(DBObject):
-    pass
+    def check_create(self, *args, **kwargs):
+        if kwargs['name'] in [a.name for a in self._oblist
+                              if a.owner is kwargs['owner']]:
+            raise TransactionIntegrityError()
+
+    def check_delete(self):
+        for h in Host:
+            if h.credentials is self:
+                raise ConstraintError()
+
 
 class Host(DBObject):
-    pass
-
-def select(i):
-    return i
-
-def get(i):
-    try:
-        return next(i)
-    except StopIteration:
-        pass
-
-def db_session(func):
-    return func
+    def check_create(self, *args, **kwargs):
+        if kwargs['name'] in [a.name for a in self._oblist
+                              if a.credentials is kwargs['credentials']]:
+            raise TransactionIntegrityError()
 
 if __name__ == '__main__':
     user1 = Account(name='user1', password='secret')

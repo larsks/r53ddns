@@ -6,9 +6,13 @@ import json
 from fresco.exceptions import *
 
 from r53ddns.tests.base import Base
-from r53ddns.model import *
+import r53ddns.tests.fakemodel as model
 from r53ddns.exceptions import *
 import r53ddns.views.host
+
+r53ddns.views.host.model = model
+r53ddns.views.host.TransactionIntegrityError = model.TransactionIntegrityError
+r53ddns.views.host.ConstraintError = model.ConstraintError
 
 route53 = Mock()
 route53_connection = Mock()
@@ -22,12 +26,13 @@ route53_connection.list_hosted_zones.return_value = [
     zone_example_com,
 ]
 
+r53ddns.views.host.route53 = route53
+
 class TestHost(Base):
     def setUp(self):
         super(TestHost, self).setUp()
         self.host = r53ddns.views.host.HostManager()
         r53ddns.views.host.context = self.context
-        r53ddns.views.host.route53 = route53
 
     def test_list_hosts(self):
         res = self.host.list_hosts('user3')
@@ -79,9 +84,8 @@ class TestHost(Base):
         self.assertRaises(NotFound, self.host.delete_host,
                           'user1', 'host.example.com')
 
-    @db_session
     def test_update_host(self):
-        host = get(host for host in Host
+        host = model.get(host for host in model.Host
                    if host.credentials.owner.name == 'user3' and
                    host.name == 'host.example.com')
 

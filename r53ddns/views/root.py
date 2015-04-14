@@ -20,9 +20,8 @@ from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco import context
 from fresco.exceptions import *
 
-from r53ddns.utils import *
-from r53ddns.model import *
-
+from r53ddns.decorators import *
+import r53ddns.utils as utils
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +47,6 @@ class RootManager(object):
         }
 
     @json_response
-    @db_session
     @is_admin
     def debug(self):
         '''Dumps the WSGI environment as a JSON document.'''
@@ -57,4 +55,4 @@ class RootManager(object):
     def ip(self):
         '''Return the ip address of the client (from the perspective
         of this service).'''
-        return Response(remote_addr() + '\n')
+        return Response(utils.remote_addr() + '\n')

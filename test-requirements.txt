@@ -1,4 +1,3 @@
 mock
 nose
 testtools
-git+git://github.com/ponyorm/pony.git
