@@ -25,7 +25,6 @@ class Base (TestCase):
         context.app.options = {
             'ADMIN_NAME': 'admin',
             'ADMIN_PASSWORD': 'secret',
-            'NO_ROUTE53_UPDATE': True,
         }
 
         self.context = context

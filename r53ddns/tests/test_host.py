@@ -10,11 +10,24 @@ from r53ddns.model import *
 from r53ddns.exceptions import *
 import r53ddns.views.host
 
-class TestCredentials(Base):
+route53 = Mock()
+route53_connection = Mock()
+zone_example_com = Mock()
+zone_example_com.name = 'example.com.'
+host_example_com = Mock()
+host_example_com.name = 'host.example.com.'
+zone_example_com.record_sets = [host_example_com]
+route53.connect.return_value = route53_connection
+route53_connection.list_hosted_zones.return_value = [
+    zone_example_com,
+]
+
+class TestHost(Base):
     def setUp(self):
-        super(TestCredentials, self).setUp()
+        super(TestHost, self).setUp()
         self.host = r53ddns.views.host.HostManager()
         r53ddns.views.host.context = self.context
+        r53ddns.views.host.route53 = route53
 
     def test_list_hosts(self):
         res = self.host.list_hosts('user3')
@@ -83,6 +96,11 @@ class TestCredentials(Base):
         self.assertThat(res.get_header('content-type'),
                         StartsWith('text/html'))
         self.assertEquals(res.content.strip(), '1.1.1.1')
+
+    def test_update_host_address_missing_host(self):
+        self.assertRaises(NotFound, self.host.update_host_address,
+                          'user3', 'does_not_exist.example.com',
+                          address='auto')
 
     def test_update_host_address_auto(self):
         res = self.host.update_host_address('user3', 'host.example.com',

@@ -66,7 +66,18 @@ class TestCredentials(Base):
         res = json.loads(res.content)
         self.assertEquals(res['accesskey'], 'access2')
 
+    def test_update_credentials_name(self):
+        self.creds.update_credentials('user2', 'default',
+                                      name='testing')
+        self.assertRaises(NotFound, self.creds.get_credentials,
+                          'user2', 'default')
+        assert(self.creds.get_credentials('user2', 'testing'))
+
     def test_delete_credentials(self):
         self.creds.delete_credentials('user2', 'default')
         self.assertRaises(NotFound, self.creds.get_credentials,
                           'user2', 'default')
+
+    def test_delete_inuse_credentials(self):
+        self.assertRaises(Conflict, self.creds.delete_credentials,
+                          'user3', 'default')

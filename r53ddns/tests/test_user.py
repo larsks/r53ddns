@@ -56,6 +56,13 @@ class TestUser(Base):
 
         self.assertNotEqual(orig_password, new_password)
 
+    def test_update_user_admin(self):
+        res = self.user.update_user_admin('user1', True)
+        self.assertEqual(res.get_header('content-type'),
+                         'application/json')
+        res = json.loads(res.content)
+        assert(res['is_admin'])
+
     def test_delete_user(self):
         self.user.delete_user('user2')
         self.assertRaises(NotFound, self.user.get_user, 'user2')
