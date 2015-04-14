@@ -14,11 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from decorator import decorator
+import base64
+import logging
+
+from passlib.apps import custom_app_context as passlib
 from fresco.exceptions import *
-from fresco import Response, context
-import json
-import datetime
+from fresco import context
 
 import r53ddns.model as model
 
@@ -28,6 +29,8 @@ __all__ = [
     'lookup_credentials_for',
     'lookup_host_for',
 ]
+
+LOG = logging.getLogger(__name__)
 
 
 def remote_addr():
@@ -56,7 +59,7 @@ def lookup_credentials_for(account, name_or_id):
     if name_or_id.isdigit():
         return model.get(c for c in model.Credentials
                          if c.owner.id == account.id and
-                         c.id == name_or_id)
+                         c.id == int(name_or_id))
     else:
         return model.get(c for c in model.Credentials
                          if c.owner.id == account.id and
@@ -69,8 +72,41 @@ def lookup_host_for(account, name_or_id):
     if name_or_id.isdigit():
         return model.get(h for h in model.Host
                          if h.credentials.owner.id == account.id and
-                         h.id == name_or_id)
+                         h.id == int(name_or_id))
     else:
         return model.get(h for h in model.Host
                          if h.credentials.owner.id == account.id and
                          h.name == name_or_id)
+
+
+def verify_password(account, password_to_check):
+    return passlib.verify(password_to_check, account.password)
+
+
+@model.db_session
+def extract_auth_info(request):
+    '''This runs at the beginning of each request and provisions
+    a `requester` key in request.environ if the client has provided valid
+    credentials.'''
+
+    auth = request.get_header('authorization')
+
+    if not auth:
+        return
+
+    auth_type, auth_data = auth.split(None, 1)
+    request.environ['auth_data'] = auth_data
+    request.environ['auth_type'] = auth_type
+
+    if auth_type == 'Basic':
+        auth_data = base64.decodestring(auth_data)
+        auth_name, auth_pass = auth_data.split(':', 1)
+        request.environ['auth_name'] = auth_name
+        request.environ['auth_pass'] = auth_pass
+
+        LOG.info('authenticating request to %s by %s',
+                 request.url, auth_name)
+
+        account = lookup_user(auth_name)
+        if account is not None and verify_password(account, auth_pass):
+            request.environ['requester'] = account

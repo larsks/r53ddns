@@ -14,11 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 from fresco import FrescoApp
-import base64
 import logging
-from passlib.apps import custom_app_context as passlib
 
 import r53ddns.views as views
 import r53ddns.model as model
@@ -31,45 +28,35 @@ config = {
     'ADMIN_NAME': 'admin',
 }
 
-app = FrescoApp()
-app.options.update(config)
-app.options.update_from_file(os.path.join(
-    os.environ.get('OPENSHIFT_DATA_DIR', '.'),
-    'settings.py'))
 
-model.setup_database(app.options.DATABASE)
+class R53DDNS (FrescoApp):
+    def __init__(self, config_file='settings.py'):
+        super(R53DDNS, self).__init__()
 
-app.include('/user/<username:str>/credentials', views.CredentialManager())
-app.include('/user/<username:str>/host', views.HostManager())
-app.include('/user', views.UserManager())
-app.include('/', views.RootManager())
+        self.config_file = config_file
 
+        self.setup_config()
+        self.setup_routes()
+        self.setup_request()
+        self.setup_database()
 
-@app.process_request
-@model.db_session
-def extract_auth_info(request):
-    '''This runs at the beginning of each request and provisions
-    a `requester` key in request.environ if the client has provided valid
-    credentials.'''
+    def setup_database(self):
+        model.setup_database(self.options.DATABASE)
 
-    auth = request.get_header('authorization')
+    def setup_request(self):
+        self.process_request(utils.extract_auth_info)
 
-    if not auth:
-        return
+    def setup_config(self):
+        self.options.update(config)
+        self.options.update_from_file(
+            self.config_file)
 
-    auth_type, auth_data = auth.split(None, 1)
-    request.environ['auth_data'] = auth_data
-    request.environ['auth_type'] = auth_type
-
-    if auth_type == 'Basic':
-        auth_data = base64.decodestring(auth_data)
-        auth_name, auth_pass = auth_data.split(':', 1)
-        request.environ['auth_name'] = auth_name
-        request.environ['auth_pass'] = auth_pass
-
-        LOG.info('authenticating request to %s by %s',
-                 request.url, auth_name)
-
-        account = utils.lookup_user(auth_name)
-        if account and passlib.verify(auth_pass, account.password):
-            request.environ['requester'] = account
+    def setup_routes(self):
+        self.include('/user/<username:str>/credentials',
+                     views.CredentialManager())
+        self.include('/user/<username:str>/host',
+                     views.HostManager())
+        self.include('/user',
+                     views.UserManager())
+        self.include('/',
+                     views.RootManager())
