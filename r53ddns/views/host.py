@@ -60,23 +60,23 @@ class HostManager (object):
     @model.db_session
     @is_admin_or_self
     def list_hosts(self, username):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        hosts = select(host for host in model.Host
-                       if host.credentials.owner.id == account.id)
+        hosts = model.select(host for host in model.Host
+                             if host.credentials.owner.id == account.id)
         return [host.to_dict() for host in hosts]
 
     @json_response
     @model.db_session
     @is_admin_or_self
     def get_host(self, username, hostname):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        host = model.lookup_host_for(account, hostname)
+        host = utils.lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
@@ -86,11 +86,11 @@ class HostManager (object):
     @model.db_session
     @is_admin_or_self
     def delete_host(self, username, hostname):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        host = model.lookup_host_for(account, hostname)
+        host = utils.lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
@@ -101,11 +101,11 @@ class HostManager (object):
     @model.db_session
     @is_admin_or_self
     def get_host_address(self, username, hostname):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        host = model.lookup_host_for(account, hostname)
+        host = utils.lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
@@ -116,15 +116,15 @@ class HostManager (object):
     @is_admin_or_self
     def update_host_address(self, username, hostname, address=None):
         if address is None or address == 'auto':
-            address = remote_addr()
+            address = utils.remote_addr()
         elif not re_ip.match(address):
             raise BadRequest()
 
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        host = model.lookup_host_for(account, hostname)
+        host = utils.lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
@@ -162,11 +162,11 @@ class HostManager (object):
     @model.db_session
     @is_admin_or_self
     def create_host(self, username, name, credentials, zone=None):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        cred = model.lookup_credentials_for(account, credentials)
+        cred = utils.lookup_credentials_for(account, credentials)
         if not cred:
             raise NotFound()
 
@@ -189,16 +189,16 @@ class HostManager (object):
     @is_admin_or_self
     def update_host(self, username, hostname,
                     credentials=None):
-        account = model.lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
-        host = model.lookup_host_for(account, hostname)
+        host = utils.lookup_host_for(account, hostname)
         if not host:
             raise NotFound()
 
         if credentials is not None:
-            cred = model.lookup_credentials_for(account, credentials)
+            cred = utils.lookup_credentials_for(account, credentials)
             if not cred:
                 raise NotFound()
             host.credentials = cred
