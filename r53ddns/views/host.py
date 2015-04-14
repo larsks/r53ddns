@@ -147,10 +147,10 @@ class HostManager (object):
             aws_secret_access_key=host.credentials.secretkey)
 
         try:
-            zone = (z for z in amz.list_hosted_zones()
-                    if z.name == host.zone + '.').next()
-            rs = (r for r in zone.record_sets
-                  if r.name == host.name + '.').next()
+            zone = next(z for z in amz.list_hosted_zones()
+                    if z.name == host.zone + '.')
+            rs = next(r for r in zone.record_sets
+                  if r.name == host.name + '.')
         except (StopIteration, TypeError):
             raise NotFound()
 

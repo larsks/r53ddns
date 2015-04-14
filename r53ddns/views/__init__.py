@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from user import UserManager
-from root import RootManager
-from host import HostManager
-from credentials import CredentialManager
+from r53ddns.views.user import UserManager
+from r53ddns.views.root import RootManager
+from r53ddns.views.host import HostManager
+from r53ddns.views.credentials import CredentialManager
