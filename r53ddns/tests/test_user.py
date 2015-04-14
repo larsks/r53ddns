@@ -1,5 +1,3 @@
-from mock import Mock
-from testtools import TestCase
 from testtools.matchers import StartsWith
 import json
 

@@ -1,6 +1,4 @@
 from mock import Mock
-from testtools import TestCase
-from testtools.matchers import StartsWith
 
 from r53ddns.tests.base import Base
 from r53ddns.exceptions import *

@@ -1,23 +1,15 @@
-from mock import Mock
-from testtools import TestCase
 import json
 
 from r53ddns.tests.base import Base
 import r53ddns.views.root
 import r53ddns.utils
 
-context = Mock()
-context.request.environ = {
-    'REMOTE_ADDR': '127.0.0.1',
-}
-r53ddns.views.root.context = context
-r53ddns.utils.context = context
-
 
 class TestRoot(Base):
     def setUp(self):
         super(TestRoot, self).setUp()
         self.root = r53ddns.views.root.RootManager()
+        r53ddns.views.root.context = self.context
 
     def test_root_entrypoint(self):
         res = self.root.index()
