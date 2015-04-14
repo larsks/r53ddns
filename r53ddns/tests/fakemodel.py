@@ -1,19 +1,32 @@
+'''This class is a mock of the actual database model.  We use this class in
+testing so that we are testing our code rather than the code in the
+pony module.  This helps differentiate between bugs in our code vs. bugs in
+the upstream code (such as https://github.com/ponyorm/pony/issues/122).'''
+
 from six import with_metaclass
 
 
 class ConstraintError(Exception):
+    '''This replaces pony.orm.ConstraintError'''
     pass
 
 
 class TransactionIntegrityError (Exception):
+    '''This replaces pony.orm.TransactionIntegrityError'''
     pass
 
 
 def select(i):
+    '''This replaces the pony 'select' function.  This stub returns
+    whatever generator it receives as its argument.'''
     return i
 
 
 def get(i):
+    '''This replaces the pony 'get' function.  This stub calls next() on
+    whatever generator it receives as its argument.  This meets the needs
+    of our tests but *does not* accurately reflecf the behavior of the real
+    'get' function.'''
     try:
         return next(i)
     except StopIteration:
@@ -21,6 +34,8 @@ def get(i):
 
 
 def db_session(func):
+    '''This is a no-op decorator that can be used in place of pony's
+    db_session decorator.'''
     return func
 
 
@@ -109,6 +124,7 @@ class DBObject(with_metaclass(DBMeta, object)):
         kls._oblist = []
         kls._obdict = {}
         kls._idseq = 0
+
 
 class Account(DBObject):
     _defaults = {

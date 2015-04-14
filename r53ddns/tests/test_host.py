@@ -1,5 +1,4 @@
 from mock import Mock
-from testtools import TestCase
 from testtools.matchers import StartsWith
 import json
 
@@ -27,6 +26,7 @@ route53_connection.list_hosted_zones.return_value = [
 ]
 
 r53ddns.views.host.route53 = route53
+
 
 class TestHost(Base):
     def setUp(self):
@@ -86,10 +86,8 @@ class TestHost(Base):
 
     def test_update_host(self):
         host = model.get(host for host in model.Host
-                   if host.credentials.owner.name == 'user3' and
-                   host.name == 'host.example.com')
-
-        orig_cred = host.credentials
+                         if host.credentials.owner.name == 'user3' and
+                         host.name == 'host.example.com')
 
         res = self.host.update_host('user3', 'host.example.com',
                                     credentials='testing')

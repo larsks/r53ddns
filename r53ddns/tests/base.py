@@ -44,9 +44,9 @@ class Base (TestCase):
                           password='secret')
 
         user2 = model.get(account for account in model.Account
-                    if account.name == 'user2')
+                          if account.name == 'user2')
         user3 = model.get(account for account in model.Account
-                    if account.name == 'user3')
+                          if account.name == 'user3')
 
         model.Credentials(owner=user2,
                           accesskey='access',

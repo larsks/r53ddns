@@ -1,16 +1,16 @@
 # r53ddns -- dynamic dns server for Route53
 # Copyright (C) 2015 Lars Kellogg-Stedman
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -21,7 +21,7 @@ import re
 import route53
 from pony.orm import TransactionIntegrityError
 from fresco import Route, GET, POST, PUT, DELETE, Response
-from fresco import PostArg, GetArg, context
+from fresco import PostArg, context
 from fresco.exceptions import *
 
 import r53ddns.model as model
@@ -52,7 +52,7 @@ class HostManager (object):
         Route('/<hostname:str>/address', GET, 'get_host_address'),
         Route('/<hostname:str>/address', POST, 'update_host_address',
               kwargs={
-                'address': PostArg(default=None),
+                  'address': PostArg(default=None),
               }),
     ]
 
@@ -149,9 +149,9 @@ class HostManager (object):
 
         try:
             zone = next(z for z in amz.list_hosted_zones()
-                    if z.name == host.zone + '.')
+                        if z.name == host.zone + '.')
             rs = next(r for r in zone.record_sets
-                  if r.name == host.name + '.')
+                      if r.name == host.name + '.')
         except (StopIteration, TypeError):
             raise NotFound()
 

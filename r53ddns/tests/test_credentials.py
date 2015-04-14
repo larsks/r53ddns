@@ -11,7 +11,8 @@ from r53ddns.exceptions import *
 
 import r53ddns.views.credentials
 r53ddns.views.credentials.model = model
-r53ddns.views.credentials.TransactionIntegrityError = model.TransactionIntegrityError
+r53ddns.views.credentials.TransactionIntegrityError = (
+    model.TransactionIntegrityError)
 r53ddns.views.credentials.ConstraintError = model.ConstraintError
 
 
