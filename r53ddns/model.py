@@ -123,13 +123,3 @@ database.'''
 
 select.__doc__ = '''A Pony ORM method for obtaining multiple results from
 the database.'''
-
-if __name__ == '__main__':
-    import sys
-
-    try:
-        filename = sys.argv[1]
-    except IndexError:
-        filename = ':memory:'
-
-    setup_database(filename)
