@@ -28,10 +28,8 @@ class Base (TestCase):
             'NO_ROUTE53_UPDATE': True,
         }
 
-
         self.context = context
         r53ddns.utils.context = context
-
 
     @db_session
     def populate_database(self):
