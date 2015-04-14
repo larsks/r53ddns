@@ -21,7 +21,8 @@ import logging
 from passlib.apps import custom_app_context as passlib
 
 import r53ddns.views as views
-from r53ddns.model import *
+import r53ddns.model as model
+import r53ddns.utils as utils
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ app.options.update_from_file(os.path.join(
     os.environ.get('OPENSHIFT_DATA_DIR', '.'),
     'settings.py'))
 
-setup_database(app.options.DATABASE)
+model.setup_database(app.options.DATABASE)
 
 app.include('/user/<username:str>/credentials', views.CredentialManager())
 app.include('/user/<username:str>/host', views.HostManager())
@@ -45,7 +46,7 @@ app.include('/', views.RootManager())
 
 
 @app.process_request
-@db_session
+@model.db_session
 def extract_auth_info(request):
     '''This runs at the beginning of each request and provisions
     a `requester` key in request.environ if the client has provided valid
@@ -69,6 +70,6 @@ def extract_auth_info(request):
         LOG.info('authenticating request to %s by %s',
                  request.url, auth_name)
 
-        account = lookup_user(auth_name)
+        account = utils.lookup_user(auth_name)
         if account and passlib.verify(auth_pass, account.password):
             request.environ['requester'] = account
