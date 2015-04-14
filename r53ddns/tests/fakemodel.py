@@ -133,7 +133,10 @@ class Credentials(DBObject):
 
 
 class Host(DBObject):
-    pass
+    def check_create(self, *args, **kwargs):
+        if kwargs['name'] in [a.name for a in self._oblist
+                              if a.credentials is kwargs['credentials']]:
+            raise TransactionIntegrityError()
 
 if __name__ == '__main__':
     user1 = Account(name='user1', password='secret')
