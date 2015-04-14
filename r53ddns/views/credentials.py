@@ -20,9 +20,10 @@ import pony.orm
 from fresco import Route, GET, POST, PUT, DELETE, Response, PostArg
 from fresco.exceptions import *
 
-from r53ddns.utils import *
-from r53ddns.model import *
+import r53ddns.model as model
+import r53ddns.utils as utils
 from r53ddns.exceptions import *
+from r53ddns.decorators import *
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ class CredentialManager (object):
     ]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def list_credentials(self, username):
         account = lookup_user(username)
@@ -59,7 +60,7 @@ class CredentialManager (object):
         return [cred.to_dict() for cred in creds]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def create_credentials(self, username, accesskey, secretkey, name=None):
         account = lookup_user(username)
@@ -79,7 +80,7 @@ class CredentialManager (object):
         return (201, cred.to_dict())
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def get_credentials(self, username, id):
         account = lookup_user(username)
@@ -93,7 +94,7 @@ class CredentialManager (object):
         return cred.to_dict()
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def update_credentials(self, username, id,
                            accesskey=None, secretkey=None, name=None):
@@ -115,7 +116,7 @@ class CredentialManager (object):
         return cred.to_dict()
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def delete_credentials(self, username, id):
         account = lookup_user(username)

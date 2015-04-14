@@ -1,6 +1,7 @@
 from mock import Mock
 from testtools import TestCase
 import r53ddns.utils
+import r53ddns.decorators
 from r53ddns.model import *
 
 setup_database(':memory:')
@@ -29,6 +30,7 @@ class Base (TestCase):
 
         self.context = context
         r53ddns.utils.context = context
+        r53ddns.decorators.context = context
 
     @db_session
     def populate_database(self):

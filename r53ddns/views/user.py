@@ -17,13 +17,14 @@
 import logging
 from passlib.apps import custom_app_context as passlib
 
-import pony.orm
+from pony.orm import TransactionIntegrityError
 from fresco import Route, GET, POST, PUT, DELETE, PostArg
 from fresco.exceptions import *
 
-from r53ddns.utils import *
-from r53ddns.model import *
 from r53ddns.exceptions import *
+from r53ddns.decorators import *
+import r53ddns.model as model
+import r53ddns.utils as utils
 
 LOG = logging.getLogger(__name__)
 
@@ -52,48 +53,48 @@ class UserManager (object):
     ]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin
     def list_users(self):
         '''Return a list of all user accounts. Requires admin access.'''
         return [account.to_dict(exclude='password')
                 for account
-                in select(account for account in Account)]
+                in model.select(account for account in model.Account)]
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def get_user(self, username):
         '''Return information about a specific account.  You must either
         have admin access or be requesting information for the account with
         which you are currently authenticated.'''
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
         return account.to_dict(exclude='password')
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin
     def create_user(self, name, password, is_admin=0):
         '''Create a new account.  Requires admin access.'''
         try:
-            account = Account(name=name,
-                              password=passlib.encrypt(password),
-                              is_admin=is_admin)
+            account = model.Account(name=name,
+                                    password=passlib.encrypt(password),
+                                    is_admin=is_admin)
             account.flush()
-        except pony.orm.TransactionIntegrityError:
+        except TransactionIntegrityError:
             raise Conflict()
 
         return (201, account.to_dict(exclude='password'))
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def update_user(self, username, password=None):
         '''Update attributes on a user account. You must either have admin
         access or be modifying the account with which you authenticated.'''
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
@@ -103,11 +104,11 @@ class UserManager (object):
         return account.to_dict(exclude='password')
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin
     def update_user_admin(self, username, is_admin):
         '''Update is_admin field for a user account.'''
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
@@ -115,12 +116,12 @@ class UserManager (object):
         return account.to_dict(exclude='password')
 
     @json_response
-    @db_session
+    @model.db_session
     @is_admin_or_self
     def delete_user(self, username):
         '''Delete a user account. You must either have admin access or be
         deleting the account with which you authenticated.'''
-        account = lookup_user(username)
+        account = utils.lookup_user(username)
         if not account:
             raise NotFound()
 
