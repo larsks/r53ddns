@@ -1,5 +1,6 @@
 from mock import Mock
 from testtools import TestCase
+from contextlib import contextmanager
 
 import r53ddns.tests.fakemodel as model
 import r53ddns.utils
@@ -7,6 +8,29 @@ import r53ddns.decorators
 
 r53ddns.utils.model = model
 r53ddns.decorators.model = model
+
+
+@contextmanager
+def fakeContext(username=None, password=None):
+    context = Mock()
+    context.request.environ = {
+        'REMOTE_ADDR': '127.0.0.1',
+    }
+
+    if username:
+        context.request.environ['auth_name'] = username
+    if password:
+        context.request.environ['auth_pass'] = password
+
+    context.app.options = {
+        'ADMIN_NAME': 'admin',
+        'ADMIN_PASSWORD': 'secret',
+    }
+
+    old_context = fresco.context
+    fresco.context = context
+    yield
+    fresco.context = old_context
 
 
 class Base (TestCase):
