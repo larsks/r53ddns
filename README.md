@@ -149,24 +149,28 @@ Available configuration options:
           -d credentials=default \
           -u lars:macaroni
         {
-          "status": "created", 
-          "data": {
-            "credentials": 1, 
-            "id": 1, 
-            "zone": "oddbit.com", 
-            "name": "r53-test.oddbit.com"
-          }
+          "name": "r53-test.oddbit.com", 
+          "zone": "oddbit.com", 
+          "created": "2015-10-06 15:30:00.121071", 
+          "last_update": "2015-10-06 15:30:00.121095", 
+          "credentials": 1, 
+          "id": 6, 
+          "last_address": ""
         }
 
 - Update the address in AWS Route53:
 
-        $ curl https://r53ddns.example.com/user/lars/host/r53-test.oddbit.com/update \
+        $ curl https://r53ddns.example.com/user/lars/host/r53-test.oddbit.com/address \
+          -X POST \
           -u lars:macaroni
         {
-          "status": "updated", 
-          "data": {
-            "address": "10.0.0.97"
-          }
+          "name": "r53-test.oddbit.com", 
+          "zone": "oddbit.com", 
+          "created": "2015-04-12 20:13:32.145472", 
+          "last_update": "2015-10-06 15:29:10.026487", 
+          "credentials": 1, 
+          "id": 4, 
+          "last_address": "173.48.212.97"
         }
 
 ## Bugs
